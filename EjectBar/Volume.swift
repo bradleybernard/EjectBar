@@ -16,7 +16,8 @@ enum VolumeComponent: Int {
 }
 
 class CallbackWrapper {
-    var callback : DiskCallback
+    
+    let callback : DiskCallback
     
     init(callback: @escaping DiskCallback) {
         self.callback = callback
