@@ -12,11 +12,11 @@ typealias VolumeID = (NSCopying & NSSecureCoding & NSObjectProtocol)
 
 typealias UnmountDef = (Bool, String?)
 typealias UnmountRet = Void
-typealias UnmountCallback = UnmountDef -> UnmountRet
+typealias UnmountCallback = (UnmountDef) -> UnmountRet
 
 typealias MAppDef = (DADisk, UnsafeMutableRawPointer?)
 typealias MAppRet = Unmanaged<DADissenter>?
-typealias MAppCallback = MAppDef -> MAppRet
+typealias MAppCallback = (MAppDef) -> MAppRet
 
 enum VolumeComponent: Int {
     case root = 1
@@ -65,17 +65,17 @@ struct Volume {
 
         DADiskUnmount(disk, DADiskUnmountOptions(kDADiskMountOptionWhole & kDADiskUnmountOptionForce), { (volume, dissenter, context) in
             
-            guard let context = context else {
-                return
-            }
+//            guard let context = context else {
+//                return
+//            }
             
-            let wrapped = Unmanaged<CallbackWrapper<UnmountDef, UnmountRet>>.fromOpaque(context).takeRetainedValue()
-           
-            if let error = dissenter {
-                wrapped.callback(false, String(describing: DADissenterGetStatusString(error)))
-            } else {
-                wrapped.callback(true, nil)
-            }
+//            let wrapped = Unmanaged<CallbackWrapper<UnmountDef, UnmountRet>>.fromOpaque(context).takeRetainedValue()
+//           
+//            if let error = dissenter {
+//                wrapped.callback(false, String(describing: DADissenterGetStatusString(error)))
+//            } else {
+//                wrapped.callback(true, nil)
+//            }
             
         }, address)
     }
@@ -122,24 +122,24 @@ struct Volume {
         
         DASessionSetDispatchQueue(session, DispatchQueue.global())
         
-        let wrapper = CallbackWrapper<MAppDef, MAppRet>(callback: test)
+        let wrapper = CallbackWrapper<MAppDef, MAppRet>(callback: unmountCallback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
         
         DARegisterDiskMountApprovalCallback(session, nil, { (disk, context) -> Unmanaged<DADissenter>? in
             
-            guard let context = context else {
-                return nil
-            }
+//            guard let context = context else {
+//                return nil
+//            }
             
-            let wrapped = Unmanaged<CallbackWrapper<MAppDef, MAppRet>>.fromOpaque(context).takeRetainedValue()
-            wrapped.callback(disk, context)
+//            let wrapped = Unmanaged<CallbackWrapper<MAppDef, MAppRet>>.fromOpaque(context).takeRetainedValue()
+//            wrapped.callback(disk, context)
 
             return nil
             
         }, address)
     }
     
-    static func test(a: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
+    static func unmountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
         return nil
     }
 }
