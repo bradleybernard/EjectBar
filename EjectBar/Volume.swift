@@ -132,9 +132,7 @@ struct Volume {
             }
             
             let wrapped = Unmanaged<CallbackWrapper<MAppDef, MAppRet>>.fromOpaque(context).takeRetainedValue()
-//            wrapped.callback(disk, context)
-
-            return nil
+            return wrapped.callback(disk, context)
             
         }, address)
     }
