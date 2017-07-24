@@ -9,6 +9,7 @@
 import Foundation
 
 typealias VolumeID = (NSCopying & NSSecureCoding & NSObjectProtocol)
+typealias DiskCallback = (Bool, String?) -> Void
 
 enum VolumeComponent: Int {
     case root = 1
@@ -19,6 +20,7 @@ struct Volume {
     var id: VolumeID
     var name: String
     var device: String
+    var disk: DADisk
     var size: Int
     var ejectable: Bool
     var removable: Bool
@@ -26,13 +28,32 @@ struct Volume {
     static let keys: [URLResourceKey] = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
     static let set: Set<URLResourceKey> = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
     
-    init(id: VolumeID, name: String, device: String, size: Int, ejectable: Bool, removable: Bool) {
+    init(id: VolumeID, name: String, device: String, disk: DADisk, size: Int, ejectable: Bool, removable: Bool) {
         self.id = id
         self.name = name
         self.device = device
+        self.disk = disk
         self.size = size
         self.ejectable = ejectable
         self.removable = removable
+    }
+    
+    func unmount(callback: @escaping DiskCallback) {
+        DADiskUnmount(disk, DADiskUnmountOptions(kDADiskUnmountOptionDefault), { (volume, dissenter, context) in
+            
+            let pointer = context?.load(as: DiskCallback.self)
+            
+            guard let function = pointer else {
+                return
+            }
+            
+            if let error = dissenter {
+                function(false, String(describing: DADissenterGetStatusString(error)))
+            } else {
+                function(true, nil)
+            }
+            
+        }, nil)
     }
     
     static func fromURL(_ url: URL) -> Volume? {
@@ -47,11 +68,12 @@ struct Volume {
             let session = DASessionCreate(kCFAllocatorDefault),
             let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, url as CFURL),
             let bsdName = DADiskGetBSDName(disk)
-        else { return nil }
+        else { print("WOW")
+            return nil }
         
         let device = String(cString: bsdName)
         
-        return Volume(id: id, name: name, device: device, size: size, ejectable: ejectable, removable: removable)
+        return Volume(id: id, name: name, device: device, disk: disk, size: size, ejectable: ejectable, removable: removable)
     }
     
     static func isVolumeURL(_ url: URL) -> Bool {
