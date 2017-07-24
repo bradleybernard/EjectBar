@@ -39,7 +39,9 @@ struct Volume {
     }
     
     func unmount(callback: @escaping DiskCallback) {
-        DADiskUnmount(disk, DADiskUnmountOptions(kDADiskUnmountOptionDefault), { (volume, dissenter, context) in
+        
+
+        DADiskUnmount(disk, DADiskUnmountOptions(kDADiskUnmountOptionDefault), { (volume: DADisk, dissenter : DADissenter?, context : UnsafeMutableRawPointer?) in
             
             let pointer = context?.load(as: DiskCallback.self)
             
@@ -54,6 +56,7 @@ struct Volume {
             }
             
         }, nil)
+                
     }
     
     static func fromURL(_ url: URL) -> Volume? {
@@ -68,8 +71,7 @@ struct Volume {
             let session = DASessionCreate(kCFAllocatorDefault),
             let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, url as CFURL),
             let bsdName = DADiskGetBSDName(disk)
-        else { print("WOW")
-            return nil }
+        else { return nil }
         
         let device = String(cString: bsdName)
         

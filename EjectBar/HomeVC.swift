@@ -7,16 +7,18 @@
 //
 
 import Cocoa
-
-typealias NoVolumes = Array<Volume>
+import Foundation
 
 class HomeVC: NSViewController {    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-    }
-    
-    override func viewWillAppear() {
+        
+        let session = DASessionCreate(kCFAllocatorDefault)
+        DARegisterDiskUnmountApprovalCallback(session!, nil, { (disk: DADisk, context: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? in
+            return nil
+        }, nil)
+        
         displayVolumes(Volume.queryVolumes())
     }
     
@@ -25,6 +27,10 @@ class HomeVC: NSViewController {
         formatter.countStyle = .file
         volumes.enumerated().forEach {
             view.addSubview(NSTextField(labelWithString: $1.name + " " + formatter.string(fromByteCount: Int64($1.size))))
+            $1.unmount(callback: { (success: Bool, error: String?) in
+                print(success)
+                print(error)
+            })
         }
     }
     
