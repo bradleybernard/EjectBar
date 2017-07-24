@@ -21,6 +21,7 @@ struct Volume {
     var name: String
     var device: String
     var disk: DADisk
+    var session: DASession
     var size: Int
     var ejectable: Bool
     var removable: Bool
@@ -28,34 +29,37 @@ struct Volume {
     static let keys: [URLResourceKey] = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
     static let set: Set<URLResourceKey> = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
     
-    init(id: VolumeID, name: String, device: String, disk: DADisk, size: Int, ejectable: Bool, removable: Bool) {
+    init(id: VolumeID, name: String, device: String, disk: DADisk, session: DASession, size: Int, ejectable: Bool, removable: Bool) {
         self.id = id
         self.name = name
         self.device = device
         self.disk = disk
+        self.session = session
         self.size = size
         self.ejectable = ejectable
         self.removable = removable
     }
     
-    func unmount(callback: @escaping DiskCallback) {
+    func unmount(callback: inout DiskCallback) {
         
-
-        DADiskUnmount(disk, DADiskUnmountOptions(kDADiskUnmountOptionDefault), { (volume: DADisk, dissenter : DADissenter?, context : UnsafeMutableRawPointer?) in
+        withUnsafeMutablePointer(to: &callback, { reference in
             
-            let pointer = context?.load(as: DiskCallback.self)
-            
-            guard let function = pointer else {
-                return
-            }
-            
-            if let error = dissenter {
-                function(false, String(describing: DADissenterGetStatusString(error)))
-            } else {
-                function(true, nil)
-            }
-            
-        }, nil)
+            DADiskUnmount(disk, DADiskUnmountOptions(kDADiskMountOptionWhole), { (volume: DADisk, dissenter : DADissenter?, context : UnsafeMutableRawPointer?) in
+                
+                let pointer = context?.load(as: DiskCallback.self)
+                
+                guard let function = pointer else {
+                    return
+                }
+                
+                if let error = dissenter {
+                    function(false, String(describing: DADissenterGetStatusString(error)))
+                } else {
+                    function(true, nil)
+                }
+                
+            }, reference)
+        })
                 
     }
     
@@ -75,7 +79,7 @@ struct Volume {
         
         let device = String(cString: bsdName)
         
-        return Volume(id: id, name: name, device: device, disk: disk, size: size, ejectable: ejectable, removable: removable)
+        return Volume(id: id, name: name, device: device, disk: disk, session: session, size: size, ejectable: ejectable, removable: removable)
     }
     
     static func isVolumeURL(_ url: URL) -> Bool {
