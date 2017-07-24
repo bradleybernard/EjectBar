@@ -43,10 +43,7 @@ struct Volume {
             let name = resources.volumeLocalizedName,
             let size = resources.volumeTotalCapacity,
             let ejectable = resources.volumeIsEjectable,
-            let removable = resources.volumeIsRemovable
-        else { return nil }
-        
-        guard
+            let removable = resources.volumeIsRemovable,
             let session = DASessionCreate(kCFAllocatorDefault),
             let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, url as CFURL),
             let bsdName = DADiskGetBSDName(disk)
