@@ -15,6 +15,14 @@ enum VolumeComponent: Int {
     case root = 1
 }
 
+//class CallbackWrapper {
+//    var callback : DiskCallback
+//    
+//    init(callback: DiskCallback) {
+//        self.callback = callback
+//    }
+//}
+
 struct Volume {
     
     var id: VolumeID
@@ -41,12 +49,11 @@ struct Volume {
     }
     
     func unmount(callback: inout DiskCallback) {
-        
+
         withUnsafeMutablePointer(to: &callback, { reference in
-            
-            DADiskUnmount(disk, DADiskUnmountOptions(kDADiskMountOptionWhole), { (volume: DADisk, dissenter : DADissenter?, context : UnsafeMutableRawPointer?) in
+            DADiskUnmount(disk, DADiskUnmountOptions(kDADiskMountOptionWhole & kDADiskUnmountOptionForce), { (volume: DADisk, dissenter : DADissenter?, context : UnsafeMutableRawPointer?) in
                 
-                let pointer = context?.load(as: DiskCallback.self)
+                let pointer = unsafeBitCast(context, to: DiskCallback)
                 
                 guard let function = pointer else {
                     return
@@ -60,7 +67,6 @@ struct Volume {
                 
             }, reference)
         })
-                
     }
     
     static func fromURL(_ url: URL) -> Volume? {
@@ -78,6 +84,7 @@ struct Volume {
         else { return nil }
         
         let device = String(cString: bsdName)
+        DASessionSetDispatchQueue(session, DispatchQueue.global())
         
         return Volume(id: id, name: name, device: device, disk: disk, session: session, size: size, ejectable: ejectable, removable: removable)
     }
