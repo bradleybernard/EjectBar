@@ -20,14 +20,12 @@ class HomeVC: NSViewController {
         let formatter = ByteCountFormatter()
         formatter.countStyle = .file
         
-        var callback = { (success: Bool, error: String?) in
-            print(success)
-            print(error as Any)
-        }
-        
         volumes.enumerated().forEach {
             view.addSubview(NSTextField(labelWithString: $1.name + " " + formatter.string(fromByteCount: Int64($1.size))))
-            $1.unmount(callback: &callback)
+            $1.unmount(callback: {(success: Bool, error: String?) in
+                print(success)
+                print(error as Any)
+            })
         }
     }
     

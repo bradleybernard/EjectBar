@@ -15,13 +15,13 @@ enum VolumeComponent: Int {
     case root = 1
 }
 
-//class CallbackWrapper {
-//    var callback : DiskCallback
-//    
-//    init(callback: DiskCallback) {
-//        self.callback = callback
-//    }
-//}
+class CallbackWrapper {
+    var callback : DiskCallback
+    
+    init(callback: @escaping DiskCallback) {
+        self.callback = callback
+    }
+}
 
 struct Volume {
     
@@ -48,25 +48,26 @@ struct Volume {
         self.removable = removable
     }
     
-    func unmount(callback: inout DiskCallback) {
+    func unmount(callback: @escaping DiskCallback) {
+        
+        let wrapper = CallbackWrapper(callback: callback)
+        let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
 
-        withUnsafeMutablePointer(to: &callback, { reference in
-            DADiskUnmount(disk, DADiskUnmountOptions(kDADiskMountOptionWhole & kDADiskUnmountOptionForce), { (volume: DADisk, dissenter : DADissenter?, context : UnsafeMutableRawPointer?) in
-                
-                let pointer = unsafeBitCast(context, to: DiskCallback)
-                
-                guard let function = pointer else {
-                    return
-                }
-                
-                if let error = dissenter {
-                    function(false, String(describing: DADissenterGetStatusString(error)))
-                } else {
-                    function(true, nil)
-                }
-                
-            }, reference)
-        })
+        DADiskUnmount(disk, DADiskUnmountOptions(kDADiskMountOptionWhole & kDADiskUnmountOptionForce), { (volume, dissenter, context) in
+            
+            guard let context = context else {
+                return
+            }
+            
+            let wrapped = Unmanaged<CallbackWrapper>.fromOpaque(context).takeRetainedValue()
+           
+            if let error = dissenter {
+                wrapped.callback(false, String(describing: DADissenterGetStatusString(error)))
+            } else {
+                wrapped.callback(true, nil)
+            }
+            
+        }, address)
     }
     
     static func fromURL(_ url: URL) -> Volume? {
