@@ -65,17 +65,17 @@ struct Volume {
 
         DADiskUnmount(disk, DADiskUnmountOptions(kDADiskMountOptionWhole & kDADiskUnmountOptionForce), { (volume, dissenter, context) in
             
-//            guard let context = context else {
-//                return
-//            }
+            guard let context = context else {
+                return
+            }
             
-//            let wrapped = Unmanaged<CallbackWrapper<UnmountDef, UnmountRet>>.fromOpaque(context).takeRetainedValue()
-//           
-//            if let error = dissenter {
-//                wrapped.callback(false, String(describing: DADissenterGetStatusString(error)))
-//            } else {
-//                wrapped.callback(true, nil)
-//            }
+            let wrapped = Unmanaged<CallbackWrapper<UnmountDef, UnmountRet>>.fromOpaque(context).takeRetainedValue()
+
+            if let error = dissenter {
+                wrapped.callback(false, nil)
+            } else {
+                wrapped.callback(true, nil)
+            }
             
         }, address)
     }
@@ -127,11 +127,11 @@ struct Volume {
         
         DARegisterDiskMountApprovalCallback(session, nil, { (disk, context) -> Unmanaged<DADissenter>? in
             
-//            guard let context = context else {
-//                return nil
-//            }
+            guard let context = context else {
+                return nil
+            }
             
-//            let wrapped = Unmanaged<CallbackWrapper<MAppDef, MAppRet>>.fromOpaque(context).takeRetainedValue()
+            let wrapped = Unmanaged<CallbackWrapper<MAppDef, MAppRet>>.fromOpaque(context).takeRetainedValue()
 //            wrapped.callback(disk, context)
 
             return nil
