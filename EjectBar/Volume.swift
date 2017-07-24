@@ -122,7 +122,13 @@ struct Volume {
         
         DASessionSetDispatchQueue(session, DispatchQueue.global())
         
-        let wrapper = CallbackWrapper<MAppDef, MAppRet>(callback: unmountCallback)
+        mountApproval(session)
+        unmountApproval(session)
+    }
+
+    static func mountApproval(_ session: DASession) {
+        
+        let wrapper = CallbackWrapper<MAppDef, MAppRet>(callback: mountCallback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
         
         DARegisterDiskMountApprovalCallback(session, nil, { (disk, context) -> Unmanaged<DADissenter>? in
@@ -137,7 +143,30 @@ struct Volume {
         }, address)
     }
     
+    static func mountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
+        print("Disk mounted")
+        return nil
+    }
+
+    static func unmountApproval(_ session: DASession) {
+        
+        let wrapper = CallbackWrapper<MAppDef, MAppRet>(callback: mountCallback)
+        let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
+        
+        DARegisterDiskUnmountApprovalCallback(session, nil, { (disk, context) -> Unmanaged<DADissenter>? in
+            
+            guard let context = context else {
+                return nil
+            }
+            
+            let wrapped = Unmanaged<CallbackWrapper<MAppDef, MAppRet>>.fromOpaque(context).takeRetainedValue()
+            return wrapped.callback(disk, context)
+            
+        }, address)
+    }
+    
     static func unmountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
+        print("Disk unmounted")
         return nil
     }
 }
