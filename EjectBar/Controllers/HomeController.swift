@@ -193,7 +193,7 @@ extension HomeVC: NSTableViewDelegate {
         sender.isEnabled = true
     }
     
-    func checkboxState(_ volume: Volume) -> NSControl.StateValue {
+    func checkboxState(_ volume: Volume) -> NSCellStateValue {
         return (selected.contains(volume.name) ? NSOnState : NSOffState)
     }
 }

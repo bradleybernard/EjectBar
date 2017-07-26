@@ -84,15 +84,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     static func writeSettings(_ prefs: [String: Any]) {
         guard let path = AppDelegate.plistURL() else { return }
         
-        do {
-            if #available(OSX 10.13, *) {
-                try (prefs as NSDictionary).write(to: path)
-            } else {
-                (prefs as NSDictionary).write(to: path, atomically: true)
-            }
-        } catch {
-            print(error.localizedDescription)
-        }
+        (prefs as NSDictionary).write(to: path, atomically: true)
     }
     
     static func plistURL() -> URL? {
