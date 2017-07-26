@@ -16,7 +16,7 @@ typealias UnmountCallback = (Bool, String?) -> Void
 
 typealias MAppDef = (DADisk, UnsafeMutableRawPointer?)
 typealias MAppRet = Unmanaged<DADissenter>?
-typealias MAppCallback = (DADisk, UnsafeMutableRawPointer?) -> MAppRet
+typealias MAppCallback = (DADisk, UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>?
 
 enum VolumeComponent: Int {
     case root = 1
@@ -96,6 +96,25 @@ struct Volume {
 
         return Volume(id: id, name: name, device: device, disk: disk, size: size, ejectable: ejectable, removable: removable)
     }
+    
+    static func fromDisk(_ disk: DADisk) -> Volume? {
+        
+        guard
+            let dict = DADiskCopyDescription(disk),
+            let diskInfo = dict as? [NSString: Any],
+            let name = diskInfo[kDADiskDescriptionVolumeNameKey] as? String,
+            let size = diskInfo[kDADiskDescriptionMediaSizeKey] as? Int,
+            let ejectable = diskInfo[kDADiskDescriptionMediaEjectableKey] as? Bool,
+            let removable = diskInfo[kDADiskDescriptionMediaRemovableKey] as? Bool,
+            let bsdName = DADiskGetBSDName(disk)
+        else { return nil }
+        
+        let volumeID = (diskInfo[kDADiskDescriptionVolumeUUIDKey] as! CFUUID)
+        let id = CFUUIDCreateString(kCFAllocatorDefault, volumeID) as String
+        let device = String(cString: bsdName)
+        
+        return Volume(id: id as VolumeID, name: name, device: device, disk: disk, size: size, ejectable: ejectable, removable: removable)
+    }
 
     static func isVolumeURL(_ url: URL) -> Bool {
         return (url.pathComponents.count > 1 && url.pathComponents[VolumeComponent.root.rawValue] == "Volumes")
@@ -123,6 +142,8 @@ class VolumeListener {
             let address = UnsafeMutableRawPointer(Unmanaged.passUnretained($0).toOpaque())
             let _ = Unmanaged<CallbackWrapper<MAppDef, MAppRet>>.fromOpaque(address).takeRetainedValue()
         }
+        
+        callbacks.removeAll()
     }
     
     func registerCallbacks() {
@@ -135,6 +156,29 @@ class VolumeListener {
         
         mountApproval(session)
         unmountApproval(session)
+        appearApproval(session)
+    }
+    
+    func appearApproval(_ session: DASession) {
+        
+        let wrapper = CallbackWrapper<MAppDef, MAppRet>(callback: appearCallback)
+        let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
+        
+        DARegisterDiskAppearedCallback(session, nil, { (disk, context) -> Void in
+            //public typealias DADiskAppearedCallback = @convention(c) (DADisk, UnsafeMutableRawPointer?) -> Swift.Void
+            
+        }, address)
+        
+        callbacks.append(wrapper)
+    }
+    
+    func appearCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
+        
+//        print("Appear")
+////        let center = NotificationCenter.default
+////        center.post(name:Notification.Name(rawValue: "diskMounted"), object: disk, userInfo: nil)
+//
+        return nil
     }
     
     func mountApproval(_ session: DASession) {
@@ -157,7 +201,10 @@ class VolumeListener {
     }
     
     func mountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
-        print("Disk mounted")
+        
+        let center = NotificationCenter.default
+        center.post(name:Notification.Name(rawValue: "diskMounted"), object: Volume.fromDisk(disk), userInfo: nil)
+        
         return nil
     }
     
@@ -181,7 +228,10 @@ class VolumeListener {
     }
     
     func unmountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
-        print("Disk unmounted")
+        
+        let center = NotificationCenter.default
+        center.post(name:Notification.Name(rawValue: "diskUnmounted"), object: Volume.fromDisk(disk), userInfo: nil)
+        
         return nil
     }
 }
