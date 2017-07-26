@@ -7,3 +7,6 @@ The app uses the [Disk Arbitration framework](https://github.com/bradleybernard/
 ## Screenshots
 ![1](/Screenshots/1.png?raw=true "1")
 ![2](/Screenshots/2.png?raw=true "2")
+
+### Credits
+Created by [Bradley Bernard](https://bradleybernard.com) with [help](https://twitter.com/jckarter/status/889604979995967488) from [Joe Groff](https://twitter.com/jckarter)
