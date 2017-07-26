@@ -147,6 +147,8 @@ class VolumeListener {
         }
         
         callbacks.removeAll()
+        
+        guard let session = SessionWrapper.session else { return }
         DASessionSetDispatchQueue(session, nil)
     }
     
