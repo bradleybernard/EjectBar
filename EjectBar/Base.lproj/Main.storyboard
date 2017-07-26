@@ -689,22 +689,14 @@
                         <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="bDY-gf-WMD">
-                                <rect key="frame" x="-2" y="235" width="484" height="24"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Mounted Drives" id="uYN-S7-6ig">
-                                    <font key="font" size="16" name="RobotoMonoForPowerline-Regular"/>
-                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AEs-tv-VLm">
-                                <rect key="frame" x="0.0" y="0.0" width="480" height="227"/>
+                                <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
                                 <clipView key="contentView" id="PmH-eA-JDX">
-                                    <rect key="frame" x="1" y="0.0" width="478" height="226"/>
+                                    <rect key="frame" x="1" y="0.0" width="478" height="269"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnReordering="NO" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="dm9-xi-6D2" viewBased="YES" id="fSs-Uk-YmA">
-                                            <rect key="frame" x="0.0" y="0.0" width="478" height="203"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="478" height="246"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -822,7 +814,7 @@
                                                         </tableCellView>
                                                     </prototypeCellViews>
                                                 </tableColumn>
-                                                <tableColumn identifier="" width="121" minWidth="10" maxWidth="3.4028234663852886e+38" id="3yO-2f-a85">
+                                                <tableColumn identifier="" width="184" minWidth="10" maxWidth="3.4028234663852886e+38" id="3yO-2f-a85">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Size">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -836,11 +828,11 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView identifier="SizeCellID" id="9g2-JJ-ccf">
-                                                            <rect key="frame" x="292" y="1" width="121" height="17"/>
+                                                            <rect key="frame" x="292" y="1" width="184" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="pez-Nz-FP7">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="121" height="17"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="184" height="17"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="Awq-iD-oTU">
                                                                         <font key="font" metaFont="system"/>
                                                                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -887,11 +879,8 @@
                             <constraint firstItem="AEs-tv-VLm" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="6SA-C5-jLu"/>
                             <constraint firstItem="AEs-tv-VLm" firstAttribute="width" secondItem="m2S-Jp-Qdl" secondAttribute="width" id="8cm-rT-rdY"/>
                             <constraint firstAttribute="bottom" secondItem="AEs-tv-VLm" secondAttribute="bottom" id="Kv5-Nh-pTT"/>
-                            <constraint firstItem="AEs-tv-VLm" firstAttribute="top" secondItem="bDY-gf-WMD" secondAttribute="bottom" constant="8" id="W3r-FO-GpD"/>
-                            <constraint firstItem="bDY-gf-WMD" firstAttribute="width" secondItem="m2S-Jp-Qdl" secondAttribute="width" id="Zm1-Aw-fxW"/>
+                            <constraint firstItem="AEs-tv-VLm" firstAttribute="height" secondItem="m2S-Jp-Qdl" secondAttribute="height" id="PJX-PU-qC7"/>
                             <constraint firstAttribute="trailing" secondItem="AEs-tv-VLm" secondAttribute="trailing" id="awj-VQ-wDB"/>
-                            <constraint firstItem="bDY-gf-WMD" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="pvn-Im-HuP"/>
-                            <constraint firstItem="bDY-gf-WMD" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="11" id="ubd-Uf-TIu"/>
                         </constraints>
                     </view>
                     <connections>

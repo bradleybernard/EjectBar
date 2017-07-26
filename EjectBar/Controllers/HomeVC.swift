@@ -16,6 +16,7 @@ class HomeVC: NSViewController {
     
     var plist = [String: Any]()
     var selected = Set<String>()
+    var visible = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,15 +50,37 @@ class HomeVC: NSViewController {
         let center = NotificationCenter.default
         center.addObserver(forName: Notification.Name(rawValue: "diskMounted"), object: nil, queue: nil, using: diskMountedNotification)
         center.addObserver(forName: Notification.Name(rawValue: "diskUnmounted"), object: nil, queue: nil, using: diskUnmountedNotification)
-        center.addObserver(forName: Notification.Name(rawValue: "rightClick"), object: nil, queue: nil, using: diskUnmountedNotification)
+        center.addObserver(forName: Notification.Name(rawValue: "rightClick"), object: nil, queue: nil, using: rightClick)
+        center.addObserver(forName: Notification.Name(rawValue: "leftClick"), object: nil, queue: nil, using: leftClick)
     }
     
     func rightClick(notification: Notification) {
-        volumes.forEach { $0.unmount(callback: { (status, error) in
-            if let error = error {
-                NSAlert(error: NSError(domain: error, code: 100, userInfo: nil))
+        volumes.forEach { (volume) in
+            if selected.contains(volume.name) {
+                volume.unmount(callback: { (status, error) in
+                    if let error = error {
+                        let alert = NSAlert(error: NSError(domain: error, code: 100, userInfo: nil))
+                        DispatchQueue.main.sync {
+                            // Silence unused response
+                            _ = alert.runModal()
+                        }
+                    }
+                })
             }
-        })}
+        }
+    }
+    
+    func leftClick(notification: Notification) {
+        guard let window = view.window else { return }
+        
+        if visible {
+            window.orderOut(self)
+        } else {
+            window.makeKeyAndOrderFront(self)
+            NSRunningApplication.current().activate(options: .activateIgnoringOtherApps)
+        }
+        
+        visible = !visible
     }
     
     func diskMountedNotification(notification: Notification) {
