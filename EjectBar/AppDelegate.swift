@@ -17,6 +17,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     var plist = [String: Any]()
     let statusItem = NSStatusBar.system().statusItem(withLength: NSVariableStatusItemLength)
+    
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
+        setupMenu()
+        setupNotificationListeners()
+    }
+    
+    func applicationWillTerminate(_ aNotification: Notification) {
+        // application will terminate
+    }
+    
+    func setupNotificationListeners() {
+        let center = NotificationCenter.default
+        center.addObserver(forName: Notification.Name(rawValue: "diskCount"), object: nil, queue: nil, using: diskCount)
+        center.post(name:Notification.Name(rawValue: "queryCount"), object: nil, userInfo: nil)
+    }
+    
+    func diskCount(notification: Notification) {
+        
+        guard
+            let info = notification.userInfo,
+            let count = info["count"] as? Int
+        else { return }
+        
+        DispatchQueue.main.async {
+            self.statusItem.title = String(count)
+        }
+    }
 
     static func loadSettings() -> [String: Any]? {
         
@@ -78,10 +105,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         return dest
     }
-
-    func applicationDidFinishLaunching(_ aNotification: Notification) {
-        setupMenu()
-    }
     
     func setupMenu() {
         guard let button = statusItem.button else { return }
@@ -89,6 +112,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         button.image = NSImage(named: "EjectIcon")
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         statusItem.action = #selector(AppDelegate.menuClick)
+//        statusItem.title = "0"
     }
     
     func menuClick(sender: NSStatusItem) {
@@ -103,10 +127,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else if event.type == NSEventType.leftMouseUp {
             center.post(name:Notification.Name(rawValue: "leftClick"), object: nil, userInfo: nil)
         }
-    }
-
-    func applicationWillTerminate(_ aNotification: Notification) {
-        
     }
 }
 

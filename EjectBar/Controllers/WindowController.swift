@@ -13,11 +13,7 @@ class WindowController: NSWindowController {
     override func windowDidLoad() {
         super.windowDidLoad()
         
-        setupWindow()
+        guard let window = window else { return }
+        window.title = "Mounted Volumes"
     }
-    
-    func setupWindow() {
-        window?.title = "Mounted Volumes"
-    }
-
 }
