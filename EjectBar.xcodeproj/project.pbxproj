@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		111A508C1F285C270077FE90 /* SelectedTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111A508B1F285C270077FE90 /* SelectedTableCell.swift */; };
+		111A50901F2865FF0077FE90 /* Settings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 111A508F1F2865FF0077FE90 /* Settings.plist */; };
 		11EFD8461F25D43700A225DD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EFD8451F25D43700A225DD /* AppDelegate.swift */; };
 		11EFD84A1F25D43700A225DD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 11EFD8491F25D43700A225DD /* Assets.xcassets */; };
 		11EFD84D1F25D43700A225DD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 11EFD84B1F25D43700A225DD /* Main.storyboard */; };
@@ -18,6 +19,7 @@
 
 /* Begin PBXFileReference section */
 		111A508B1F285C270077FE90 /* SelectedTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedTableCell.swift; sourceTree = "<group>"; };
+		111A508F1F2865FF0077FE90 /* Settings.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Settings.plist; sourceTree = "<group>"; };
 		11EFD8421F25D43700A225DD /* EjectBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EjectBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		11EFD8451F25D43700A225DD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		11EFD8491F25D43700A225DD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -39,6 +41,39 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		111A50911F2903020077FE90 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				111A508F1F2865FF0077FE90 /* Settings.plist */,
+			);
+			path = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		111A50921F2903160077FE90 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				11EFD8561F25D69000A225DD /* WindowController.swift */,
+				11EFD8541F25D5CD00A225DD /* HomeVC.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		111A50931F29032D0077FE90 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				11EFD8581F25D84000A225DD /* Volume.swift */,
+			);
+			path = Classes;
+			sourceTree = "<group>";
+		};
+		111A50941F29033B0077FE90 /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				111A508B1F285C270077FE90 /* SelectedTableCell.swift */,
+			);
+			path = Cells;
+			sourceTree = "<group>";
+		};
 		11EFD8391F25D43600A225DD = {
 			isa = PBXGroup;
 			children = (
@@ -58,14 +93,14 @@
 		11EFD8441F25D43700A225DD /* EjectBar */ = {
 			isa = PBXGroup;
 			children = (
+				111A50941F29033B0077FE90 /* Cells */,
+				111A50931F29032D0077FE90 /* Classes */,
+				111A50921F2903160077FE90 /* Controllers */,
+				111A50911F2903020077FE90 /* Supporting Files */,
 				11EFD8451F25D43700A225DD /* AppDelegate.swift */,
 				11EFD8491F25D43700A225DD /* Assets.xcassets */,
-				11EFD84B1F25D43700A225DD /* Main.storyboard */,
-				111A508B1F285C270077FE90 /* SelectedTableCell.swift */,
-				11EFD8561F25D69000A225DD /* WindowController.swift */,
 				11EFD84E1F25D43700A225DD /* Info.plist */,
-				11EFD8541F25D5CD00A225DD /* HomeVC.swift */,
-				11EFD8581F25D84000A225DD /* Volume.swift */,
+				11EFD84B1F25D43700A225DD /* Main.storyboard */,
 			);
 			path = EjectBar;
 			sourceTree = "<group>";
@@ -132,6 +167,7 @@
 			files = (
 				11EFD84A1F25D43700A225DD /* Assets.xcassets in Resources */,
 				11EFD84D1F25D43700A225DD /* Main.storyboard in Resources */,
+				111A50901F2865FF0077FE90 /* Settings.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

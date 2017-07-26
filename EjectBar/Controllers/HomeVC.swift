@@ -13,13 +13,28 @@ class HomeVC: NSViewController {
     
     @IBOutlet weak var tableView: NSTableView!
     var volumes = [Volume]()
+    var selected = Set<String>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
                 
         volumes = Volume.queryVolumes()
-        setupNotificationListeners()
         VolumeListener.instance.registerCallbacks()
+        
+        setupNotificationListeners()
+        readSelected()
+    }
+    
+    func readSelected() {
+        
+//        guard
+//            let selectedSaved = SwiftyPlistManager.shared.fetchValue(for: "Selected", fromPlistWithName: "Settings"),
+//            let saved = selectedSaved as? Array<String>
+//        else { return }
+    
+        
+//        selected = Set(saved)
+        tableView.reloadData()
     }
     
     func setupNotificationListeners() {
@@ -101,12 +116,35 @@ extension HomeVC: NSTableViewDelegate {
                 cell.textField?.stringValue = text
             } else {
                 let selected = (cell as! SelectedTableCell)
-                selected.saveCheckbox.state = NSOffState
+                selected.saveCheckbox.state = checkboxState(volume)
+                selected.saveCheckbox.action = #selector(HomeVC.checkboxSelected)
+                selected.saveCheckbox.tag = row
             }
             return cell
         }
         
         return nil
+    }
+    
+    func checkboxSelected(sender: NSButton) {
+        let volume = volumes[sender.tag]
+        
+        sender.isEnabled = false
+        if sender.state == NSOnState {
+            selected.insert(volume.name)
+        } else if sender.state == NSOffState {
+            selected.remove(volume.name)
+        }
+        
+//        SwiftyPlistManager.shared.save(Array(selected), forKey: "Selected", toPlistWithName: "Settings") { (err) in
+//            DispatchQueue.main.sync {
+//                sender.isEnabled = true
+//            }
+//        }
+    }
+    
+    func checkboxState(_ volume: Volume) -> NSControl.StateValue {
+        return (selected.contains(volume.name) ? NSOnState : NSOffState)
     }
 }
 
