@@ -138,7 +138,6 @@
 					11EFD8411F25D43700A225DD = {
 						CreatedOnToolsVersion = 8.3.3;
 						DevelopmentTeam = RMJV5R42F5;
-						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -317,8 +316,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.bradleybernard.EjectBar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -334,8 +332,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.bradleybernard.EjectBar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_SWIFT3_OBJC_INFERENCE = Off;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

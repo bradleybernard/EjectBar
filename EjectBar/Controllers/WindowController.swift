@@ -18,10 +18,11 @@ class WindowController: NSWindowController {
         
         window.addTitlebarAccessoryViewController(titleBarButton(title: "Quit", selector: #selector(WindowController.quit)))
         window.addTitlebarAccessoryViewController(titleBarButton(title: "Hide", selector: #selector(WindowController.hide)))
-        window.styleMask.insert(NSWindow.StyleMask.fullSizeContentView)
+        window.styleMask.insert(NSWindowStyleMask.fullSizeContentView)
+
     }
     
-    @objc func titleBarButton(title: String, selector: Selector) -> NSTitlebarAccessoryViewController {
+    func titleBarButton(title: String, selector: Selector) -> NSTitlebarAccessoryViewController {
         let button = NSButton(title: title, target: nil, action: selector)
         let accessory = NSTitlebarAccessoryViewController()
         accessory.layoutAttribute = .right
@@ -29,11 +30,11 @@ class WindowController: NSWindowController {
         return accessory
     }
     
-    @objc func hide() {
+    func hide() {
         window?.orderOut(self)
     }
     
-    @objc func quit() {
-        NSApplication.shared.terminate(nil)
+    func quit() {
+        NSApplication.shared().terminate(nil)
     }
 }

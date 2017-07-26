@@ -794,7 +794,7 @@
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="GVN-KC-0UB">
-                                                                    <rect key="frame" x="-2" y="0.0" width="97" height="17"/>
+                                                                    <rect key="frame" x="-2" y="0.0" width="68" height="17"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="LgP-Av-T5L">
                                                                         <font key="font" metaFont="system"/>
                                                                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
@@ -804,8 +804,8 @@
                                                             </subviews>
                                                             <constraints>
                                                                 <constraint firstItem="GVN-KC-0UB" firstAttribute="height" secondItem="W0A-oZ-IwU" secondAttribute="height" id="0yb-l9-gnv"/>
-                                                                <constraint firstItem="GVN-KC-0UB" firstAttribute="centerX" secondItem="W0A-oZ-IwU" secondAttribute="centerX" constant="14.5" id="Naf-hy-dwl"/>
-                                                                <constraint firstItem="GVN-KC-0UB" firstAttribute="width" secondItem="W0A-oZ-IwU" secondAttribute="width" constant="29" id="bzE-gH-nWF"/>
+                                                                <constraint firstItem="GVN-KC-0UB" firstAttribute="centerX" secondItem="W0A-oZ-IwU" secondAttribute="centerX" id="Naf-hy-dwl"/>
+                                                                <constraint firstItem="GVN-KC-0UB" firstAttribute="width" secondItem="W0A-oZ-IwU" secondAttribute="width" id="bzE-gH-nWF"/>
                                                                 <constraint firstItem="GVN-KC-0UB" firstAttribute="centerY" secondItem="W0A-oZ-IwU" secondAttribute="centerY" id="h6B-Jb-1Bt"/>
                                                             </constraints>
                                                             <connections>
