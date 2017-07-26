@@ -112,14 +112,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         button.image = NSImage(named: "EjectIcon")
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         statusItem.action = #selector(AppDelegate.menuClick)
-//        statusItem.title = "0"
     }
     
     func menuClick(sender: NSStatusItem) {
         
-        guard let event = NSApp.currentEvent else { print("wut")
-            return }
-        
+        guard let event = NSApp.currentEvent else { return }
         let center = NotificationCenter.default
         
         if event.type == NSEventType.rightMouseUp {

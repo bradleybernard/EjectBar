@@ -6,9 +6,8 @@
 //  Copyright © 2017 Bradley Bernard. All rights reserved.
 //
 //
-import Foundation
 
-typealias VolumeID = (NSCopying & NSSecureCoding & NSObjectProtocol)
+import Foundation
 
 typealias UnmountDef = (Bool, String?)
 typealias UnmountRet = Void

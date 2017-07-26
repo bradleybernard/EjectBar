@@ -12,7 +12,7 @@
 		11EFD8461F25D43700A225DD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EFD8451F25D43700A225DD /* AppDelegate.swift */; };
 		11EFD84A1F25D43700A225DD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 11EFD8491F25D43700A225DD /* Assets.xcassets */; };
 		11EFD84D1F25D43700A225DD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 11EFD84B1F25D43700A225DD /* Main.storyboard */; };
-		11EFD8551F25D5CD00A225DD /* HomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EFD8541F25D5CD00A225DD /* HomeVC.swift */; };
+		11EFD8551F25D5CD00A225DD /* HomeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EFD8541F25D5CD00A225DD /* HomeController.swift */; };
 		11EFD8571F25D69000A225DD /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EFD8561F25D69000A225DD /* WindowController.swift */; };
 		11EFD8591F25D84000A225DD /* Volume.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EFD8581F25D84000A225DD /* Volume.swift */; };
 /* End PBXBuildFile section */
@@ -25,7 +25,7 @@
 		11EFD8491F25D43700A225DD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		11EFD84C1F25D43700A225DD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		11EFD84E1F25D43700A225DD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		11EFD8541F25D5CD00A225DD /* HomeVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeVC.swift; sourceTree = "<group>"; };
+		11EFD8541F25D5CD00A225DD /* HomeController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeController.swift; sourceTree = "<group>"; };
 		11EFD8561F25D69000A225DD /* WindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WindowController.swift; sourceTree = "<group>"; };
 		11EFD8581F25D84000A225DD /* Volume.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Volume.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -53,7 +53,7 @@
 			isa = PBXGroup;
 			children = (
 				11EFD8561F25D69000A225DD /* WindowController.swift */,
-				11EFD8541F25D5CD00A225DD /* HomeVC.swift */,
+				11EFD8541F25D5CD00A225DD /* HomeController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -181,7 +181,7 @@
 				11EFD8461F25D43700A225DD /* AppDelegate.swift in Sources */,
 				111A508C1F285C270077FE90 /* SelectedTableCell.swift in Sources */,
 				11EFD8571F25D69000A225DD /* WindowController.swift in Sources */,
-				11EFD8551F25D5CD00A225DD /* HomeVC.swift in Sources */,
+				11EFD8551F25D5CD00A225DD /* HomeController.swift in Sources */,
 				11EFD8591F25D84000A225DD /* Volume.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

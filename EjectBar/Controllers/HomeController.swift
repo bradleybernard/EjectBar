@@ -1,5 +1,5 @@
 //
-//  HomeVC.swift
+//  HomeController.swift
 //  EjectBar
 //
 //  Created by Bradley Bernard on 7/24/17.
@@ -110,7 +110,6 @@ class HomeVC: NSViewController {
     }
     
     func diskCountNotify() {
-        print("Notify count: \(volumes.count)")
         let center = NotificationCenter.default
         center.post(name:Notification.Name(rawValue: "diskCount"), object: nil, userInfo: ["count": volumes.count])
     }
