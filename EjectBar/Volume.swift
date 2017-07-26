@@ -116,61 +116,72 @@ struct Volume {
 class VolumeListener {
     
     static let instance = VolumeListener()
+    var callbacks = [CallbackWrapper<MAppDef, MAppRet>]()
     
-    static func registerCallbacks() {
-
+    deinit {
+        callbacks.forEach {
+            let address = UnsafeMutableRawPointer(Unmanaged.passUnretained($0).toOpaque())
+            let _ = Unmanaged<CallbackWrapper<MAppDef, MAppRet>>.fromOpaque(address).takeRetainedValue()
+        }
+    }
+    
+    func registerCallbacks() {
+        
         guard
             let session = SessionWrapper.session
-        else { return }
-
+            else { return }
+        
         DASessionSetDispatchQueue(session, DispatchQueue.global())
-
+        
         mountApproval(session)
         unmountApproval(session)
     }
-
-    static func mountApproval(_ session: DASession) {
-
+    
+    func mountApproval(_ session: DASession) {
+        
         let wrapper = CallbackWrapper<MAppDef, MAppRet>(callback: mountCallback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
-
+        
         DARegisterDiskMountApprovalCallback(session, nil, { (disk, context) -> Unmanaged<DADissenter>? in
-
+            
             guard let context = context else {
                 return nil
             }
-
+            
             let wrapped = Unmanaged<CallbackWrapper<MAppDef, MAppRet>>.fromOpaque(context).takeUnretainedValue()
             return wrapped.callback((disk, context))
             
         }, address)
+        
+        callbacks.append(wrapper)
     }
-
-    static func mountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
+    
+    func mountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
         print("Disk mounted")
         return nil
     }
-
-    static func unmountApproval(_ session: DASession) {
-
+    
+    func unmountApproval(_ session: DASession) {
+        
         let wrapper = CallbackWrapper<MAppDef, MAppRet>(callback: unmountCallback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
-
+        
         DARegisterDiskUnmountApprovalCallback(session, nil, { (disk, context) -> Unmanaged<DADissenter>? in
-
+            
             guard let context = context else {
                 return nil
             }
-
+            
             let wrapped = Unmanaged<CallbackWrapper<MAppDef, MAppRet>>.fromOpaque(context).takeUnretainedValue()
             return wrapped.callback((disk, context))
-
+            
         }, address)
+        
+        callbacks.append(wrapper)
     }
-
-    static func unmountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
+    
+    func unmountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
         print("Disk unmounted")
         return nil
     }
 }
-
