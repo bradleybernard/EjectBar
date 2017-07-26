@@ -16,7 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     static let settingsFolder: String = "Settings"
     
     var plist = [String: Any]()
-    let statusItem = NSStatusBar.system().statusItem(withLength: NSVariableStatusItemLength)
+    let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         setupMenu()
@@ -109,19 +109,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func setupMenu() {
         guard let button = statusItem.button else { return }
         
-        button.image = NSImage(named: "EjectIcon")
-        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        button.image = NSImage(named: NSImage.Name(rawValue: "EjectIcon"))
+        button.sendAction(on: [NSEvent.EventTypeMask.leftMouseUp, NSEvent.EventTypeMask.rightMouseUp])
         statusItem.action = #selector(AppDelegate.menuClick)
     }
     
-    func menuClick(sender: NSStatusItem) {
+    @objc func menuClick(sender: NSStatusItem) {
         
         guard let event = NSApp.currentEvent else { return }
         let center = NotificationCenter.default
         
-        if event.type == NSEventType.rightMouseUp {
+        if event.type == NSEvent.EventType.rightMouseUp {
             center.post(name:Notification.Name(rawValue: "rightClick"), object: nil, userInfo: nil)
-        } else if event.type == NSEventType.leftMouseUp {
+        } else if event.type == NSEvent.EventType.leftMouseUp {
             center.post(name:Notification.Name(rawValue: "leftClick"), object: nil, userInfo: nil)
         }
     }

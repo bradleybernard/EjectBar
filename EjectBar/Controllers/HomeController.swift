@@ -22,7 +22,7 @@ class HomeVC: NSViewController {
         super.viewDidLoad()
         
         tableView.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
-        tableView.autoresizingMask = .viewWidthSizable
+        tableView.autoresizingMask = NSView.AutoresizingMask.width
         tableView.sizeToFit()
         
         volumes = Volume.queryVolumes()
@@ -83,7 +83,7 @@ class HomeVC: NSViewController {
         guard let window = view.window else { return }
         
         window.makeKeyAndOrderFront(self)
-        NSRunningApplication.current().activate(options: .activateIgnoringOtherApps)
+        NSRunningApplication.current.activate(options: NSApplication.ActivationOptions.activateIgnoringOtherApps)
     }
     
     func diskMountedNotification(notification: Notification) {
@@ -162,7 +162,7 @@ extension HomeVC: NSTableViewDelegate {
             cellIdentifier = CellIdentifiers.SizeCell
         }
         
-        if let cell = tableView.make(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView {
+        if let cell = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: cellIdentifier), owner: nil) as? NSTableCellView {
             if(!custom) {
                 cell.textField?.stringValue = text
             } else {
@@ -177,13 +177,13 @@ extension HomeVC: NSTableViewDelegate {
         return nil
     }
     
-    func checkboxSelected(sender: NSButton) {
+    @objc func checkboxSelected(sender: NSButton) {
         let volume = volumes[sender.tag]
         
         sender.isEnabled = false
-        if sender.state == NSOnState {
+        if sender.state == NSControl.StateValue.onState {
             selected.insert(volume.name)
-        } else if sender.state == NSOffState {
+        } else if sender.state == NSControl.StateValue.offState {
             selected.remove(volume.name)
         }
         
@@ -194,7 +194,7 @@ extension HomeVC: NSTableViewDelegate {
     }
     
     func checkboxState(_ volume: Volume) -> NSControl.StateValue {
-        return (selected.contains(volume.name) ? NSOnState : NSOffState)
+        return (selected.contains(volume.name) ? NSControl.StateValue.onState : NSControl.StateValue.offState)
     }
 }
 
