@@ -13,7 +13,7 @@ class HomeVC: NSViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        Volume.registerCallbacks()
+        VolumeListener.registerCallbacks()
         displayVolumes(Volume.queryVolumes())
     }
     

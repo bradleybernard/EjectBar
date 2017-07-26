@@ -303,6 +303,7 @@
 				11EFD8531F25D43700A225DD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
