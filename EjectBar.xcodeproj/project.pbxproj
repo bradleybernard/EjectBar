@@ -20,6 +20,7 @@
 /* Begin PBXFileReference section */
 		111A508B1F285C270077FE90 /* SelectedTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedTableCell.swift; sourceTree = "<group>"; };
 		111A508F1F2865FF0077FE90 /* Settings.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Settings.plist; sourceTree = "<group>"; };
+		11DD8FE51F2957B600747F4C /* EjectBar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EjectBar.entitlements; sourceTree = "<group>"; };
 		11EFD8421F25D43700A225DD /* EjectBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EjectBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		11EFD8451F25D43700A225DD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		11EFD8491F25D43700A225DD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -93,6 +94,7 @@
 		11EFD8441F25D43700A225DD /* EjectBar */ = {
 			isa = PBXGroup;
 			children = (
+				11DD8FE51F2957B600747F4C /* EjectBar.entitlements */,
 				111A50941F29033B0077FE90 /* Cells */,
 				111A50931F29032D0077FE90 /* Classes */,
 				111A50921F2903160077FE90 /* Controllers */,
@@ -138,7 +140,12 @@
 					11EFD8411F25D43700A225DD = {
 						CreatedOnToolsVersion = 8.3.3;
 						DevelopmentTeam = RMJV5R42F5;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
+						SystemCapabilities = {
+							com.apple.Sandbox = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -308,14 +315,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_ENTITLEMENTS = EjectBar/EjectBar.entitlements;
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = RMJV5R42F5;
 				INFOPLIST_FILE = EjectBar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.bradleybernard.EjectBar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE = "10be620e-9f56-42c2-9d76-d0d52be4701d";
+				PROVISIONING_PROFILE_SPECIFIER = "XC OSX: com.bradleybernard.EjectBar";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -324,14 +333,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_ENTITLEMENTS = EjectBar/EjectBar.entitlements;
+				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = RMJV5R42F5;
 				INFOPLIST_FILE = EjectBar/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.bradleybernard.EjectBar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE = "10be620e-9f56-42c2-9d76-d0d52be4701d";
+				PROVISIONING_PROFILE_SPECIFIER = "XC OSX: com.bradleybernard.EjectBar";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
