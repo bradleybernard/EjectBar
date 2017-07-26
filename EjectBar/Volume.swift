@@ -22,6 +22,10 @@ enum VolumeComponent: Int {
     case root = 1
 }
 
+enum VolumeReservedNames: String {
+    case EFI = "EFI"
+}
+
 class CallbackWrapper<T, U> {
     let callback : (T) -> U
     init(callback: @escaping (T) -> U) {
@@ -38,6 +42,7 @@ struct Volume {
     var id: String
     var name: String
     var device: String
+    var path: CFURL
     var disk: DADisk
     var size: Int
     var ejectable: Bool
@@ -46,10 +51,11 @@ struct Volume {
     static let keys: [URLResourceKey] = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
     static let set: Set<URLResourceKey> = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
 
-    init(id: String, name: String, device: String, disk: DADisk, size: Int, ejectable: Bool, removable: Bool) {
+    init(id: String, name: String, device: String, path: CFURL, disk: DADisk, size: Int, ejectable: Bool, removable: Bool) {
         self.id = id
         self.name = name
         self.device = device
+        self.path = path
         self.disk = disk
         self.size = size
         self.ejectable = ejectable
@@ -97,14 +103,21 @@ struct Volume {
             let size = diskInfo[kDADiskDescriptionMediaSizeKey] as? Int,
             let ejectable = diskInfo[kDADiskDescriptionMediaEjectableKey] as? Bool,
             let removable = diskInfo[kDADiskDescriptionMediaRemovableKey] as? Bool,
-            let bsdName = DADiskGetBSDName(disk)
+            let bsdName = DADiskGetBSDName(disk),
+            let pathVal = diskInfo[kDADiskDescriptionMediaPathKey],
+            let idVal = diskInfo[kDADiskDescriptionVolumeUUIDKey]
         else { return nil }
         
-        let volumeID = (diskInfo[kDADiskDescriptionVolumeUUIDKey] as! CFUUID)
+        if name == VolumeReservedNames.EFI.rawValue {
+            return nil
+        }
+        
+        let volumeID = (idVal as! CFUUID)
         let id = CFUUIDCreateString(kCFAllocatorDefault, volumeID) as String
+        let path = pathVal as! CFURL
         let device = String(cString: bsdName)
         
-        return Volume(id: id, name: name, device: device, disk: disk, size: size, ejectable: ejectable, removable: removable)
+        return Volume(id: id, name: name, device: device, path: path, disk: disk, size: size, ejectable: ejectable, removable: removable)
     }
 
     static func isVolumeURL(_ url: URL) -> Bool {
@@ -147,29 +160,6 @@ class VolumeListener {
         
         mountApproval(session)
         unmountApproval(session)
-        appearApproval(session)
-    }
-    
-    func appearApproval(_ session: DASession) {
-        
-        let wrapper = CallbackWrapper<MAppDef, MAppRet>(callback: appearCallback)
-        let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
-        
-        DARegisterDiskAppearedCallback(session, nil, { (disk, context) -> Void in
-            //public typealias DADiskAppearedCallback = @convention(c) (DADisk, UnsafeMutableRawPointer?) -> Swift.Void
-            
-        }, address)
-        
-        callbacks.append(wrapper)
-    }
-    
-    func appearCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
-        
-//        print("Appear")
-////        let center = NotificationCenter.default
-////        center.post(name:Notification.Name(rawValue: "diskMounted"), object: disk, userInfo: nil)
-//
-        return nil
     }
     
     func mountApproval(_ session: DASession) {

@@ -16,7 +16,7 @@ class HomeVC: NSViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+                
         volumes = Volume.queryVolumes()
         setupNotificationListeners()
         VolumeListener.instance.registerCallbacks()
@@ -77,13 +77,14 @@ extension HomeVC: NSTableViewDelegate {
 
         var text: String = ""
         var cellIdentifier: String = ""
+        var custom = false
         
         let sizeFormatter = ByteCountFormatter()
         let volume = volumes[row]
         
         if tableColumn == tableView.tableColumns[0] {
-            text = "True"
             cellIdentifier = CellIdentifiers.SelectedCell
+            custom = true
         } else if tableColumn == tableView.tableColumns[1] {
             text = volume.name
             cellIdentifier = CellIdentifiers.NameCell
@@ -96,8 +97,12 @@ extension HomeVC: NSTableViewDelegate {
         }
         
         if let cell = tableView.make(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView {
-            cell.textField?.stringValue = text
-//            cell.imageView?.image = image ?? nil
+            if(!custom) {
+                cell.textField?.stringValue = text
+            } else {
+                let selected = (cell as! SelectedTableCell)
+                selected.saveCheckbox.state = NSOffState
+            }
             return cell
         }
         
