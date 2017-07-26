@@ -30,47 +30,38 @@ class HomeVC: NSViewController {
     }
     
     func diskMountedNotification(notification: Notification) {
-        print("Mounted")
-//        fetchVolumes()
-
-        guard let object = notification.object else {
+        
+        guard
+            let object = notification.object,
+            let volume = object as? Volume
+        else { return }
+        
+        if(volumeExists(volume: volume)) {
             return
         }
-//
-        let volume = object as! Volume
-        print(volume)
-//        var found = false
-//
-//        volumes.forEach {
-//            if($0.id == disk)
-//        }
+        
+        volumes.append(volume)
+        DispatchQueue.main.sync {
+            self.tableView.reloadData()
+        }
+    }
+    
+    func volumeExists(volume: Volume) -> Bool {
+        return volumes.reduce(0) { $0 + ($1.id == volume.id ? 1 : 0) } == 1
     }
     
     func diskUnmountedNotification(notification: Notification) {
-        print("Unmounted")
-//        fetchVolumes()
-    }
-    
-    func fetchVolumes() {
-//        volumes = Volume.queryVolumes()
-//        DispatchQueue.main.sync {
-//            self.tableView.reloadData()
-//        }
-    }
-    
-    func displayVolumes(_ volumes: [Volume]) {
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .file
         
-        volumes.enumerated().forEach {
-            view.addSubview(NSTextField(labelWithString: $1.name + " " + formatter.string(fromByteCount: Int64($1.size))))
-            $1.unmount(callback: {(success: Bool, error: String?) in
-                print(success)
-                print(error as Any)
-            })
+        guard
+            let object = notification.object,
+            let volume = object as? Volume
+        else { return }
+        
+        volumes = volumes.filter { $0.id != volume.id }
+        DispatchQueue.main.sync {
+            self.tableView.reloadData()
         }
     }
-    
 }
 
 extension HomeVC: NSTableViewDelegate {
@@ -97,11 +88,11 @@ extension HomeVC: NSTableViewDelegate {
             text = volume.name
             cellIdentifier = CellIdentifiers.NameCell
         } else if tableColumn == tableView.tableColumns[2] {
-            text = sizeFormatter.string(fromByteCount: Int64(volume.size))
-            cellIdentifier = CellIdentifiers.SizeCell
-        } else if tableColumn == tableView.tableColumns[3] {
             text = volume.device
             cellIdentifier = CellIdentifiers.PathCell
+        } else if tableColumn == tableView.tableColumns[3] {
+            text = sizeFormatter.string(fromByteCount: Int64(volume.size))
+            cellIdentifier = CellIdentifiers.SizeCell
         }
         
         if let cell = tableView.make(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView {

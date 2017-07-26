@@ -35,7 +35,7 @@ class SessionWrapper {
 
 struct Volume {
 
-    var id: VolumeID
+    var id: String
     var name: String
     var device: String
     var disk: DADisk
@@ -46,7 +46,7 @@ struct Volume {
     static let keys: [URLResourceKey] = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
     static let set: Set<URLResourceKey> = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
 
-    init(id: VolumeID, name: String, device: String, disk: DADisk, size: Int, ejectable: Bool, removable: Bool) {
+    init(id: String, name: String, device: String, disk: DADisk, size: Int, ejectable: Bool, removable: Bool) {
         self.id = id
         self.name = name
         self.device = device
@@ -81,20 +81,11 @@ struct Volume {
     static func fromURL(_ url: URL) -> Volume? {
 
         guard
-            let resources = try? url.resourceValues(forKeys: set),
-            let id = resources.volumeIdentifier,
-            let name = resources.volumeLocalizedName,
-            let size = resources.volumeTotalCapacity,
-            let ejectable = resources.volumeIsEjectable,
-            let removable = resources.volumeIsRemovable,
             let session = SessionWrapper.session,
-            let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, url as CFURL),
-            let bsdName = DADiskGetBSDName(disk)
+            let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, url as CFURL)
         else { return nil }
 
-        let device = String(cString: bsdName)
-
-        return Volume(id: id, name: name, device: device, disk: disk, size: size, ejectable: ejectable, removable: removable)
+        return Volume.fromDisk(disk)
     }
     
     static func fromDisk(_ disk: DADisk) -> Volume? {
@@ -113,7 +104,7 @@ struct Volume {
         let id = CFUUIDCreateString(kCFAllocatorDefault, volumeID) as String
         let device = String(cString: bsdName)
         
-        return Volume(id: id as VolumeID, name: name, device: device, disk: disk, size: size, ejectable: ejectable, removable: removable)
+        return Volume(id: id, name: name, device: device, disk: disk, size: size, ejectable: ejectable, removable: removable)
     }
 
     static func isVolumeURL(_ url: URL) -> Bool {
