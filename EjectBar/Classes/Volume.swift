@@ -147,6 +147,7 @@ class VolumeListener {
         }
         
         callbacks.removeAll()
+        DASessionSetDispatchQueue(session, nil)
     }
     
     func registerCallbacks() {
