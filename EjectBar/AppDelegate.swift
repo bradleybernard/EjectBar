@@ -79,12 +79,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-//        guard let settings = AppDelegate.loadSettings() else { return }
-//        plist = settings
+        let statusItem = NSStatusBar.system().statusItem(withLength: -2)
+        if let button = statusItem.button {
+            
+            button.image = NSImage(named: "EjectIcon")
+            button.action = Selector("test:")
+        }
+    }
+    
+    func test() {
+        print("WOW")
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-//        AppDelegate.writeSettings(plist)
     }
 }
 

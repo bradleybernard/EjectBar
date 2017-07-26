@@ -19,7 +19,11 @@ class HomeVC: NSViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-                
+        
+        tableView.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
+        tableView.autoresizingMask = .viewWidthSizable
+        tableView.sizeToFit()
+        
         volumes = Volume.queryVolumes()
         VolumeListener.instance.registerCallbacks()
         
