@@ -17,7 +17,7 @@ class WindowController: NSWindowController {
     }
     
     func setupWindow() {
-        window?.title = "EjectBar"
+        window?.title = "Mounted Volumes"
     }
 
 }

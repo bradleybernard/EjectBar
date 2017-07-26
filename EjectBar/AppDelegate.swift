@@ -16,7 +16,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     static let settingsFolder: String = "Settings"
     
     var plist = [String: Any]()
-    
+    let statusItem = NSStatusBar.system().statusItem(withLength: NSVariableStatusItemLength)
+
     static func loadSettings() -> [String: Any]? {
         
         guard
@@ -79,19 +80,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        let statusItem = NSStatusBar.system().statusItem(withLength: -2)
-        if let button = statusItem.button {
-            
-            button.image = NSImage(named: "EjectIcon")
-            button.action = Selector("test:")
-        }
+        setupMenu()
     }
     
-    func test() {
-        print("WOW")
+    func setupMenu() {
+        guard let button = statusItem.button else { return }
+        
+        button.image = NSImage(named: "EjectIcon")
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        statusItem.action = #selector(AppDelegate.menuClick)
+    }
+    
+    func menuClick(sender: NSStatusItem) {
+        
+        guard let event = NSApp.currentEvent else { print("wut")
+            return }
+        
+        let center = NotificationCenter.default
+        
+        if event.type == NSEventType.rightMouseUp {
+            center.post(name:Notification.Name(rawValue: "rightClick"), object: nil, userInfo: nil)
+        } else if event.type == NSEventType.leftMouseUp {
+            center.post(name:Notification.Name(rawValue: "leftClick"), object: nil, userInfo: nil)
+        }
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
+        
     }
 }
 

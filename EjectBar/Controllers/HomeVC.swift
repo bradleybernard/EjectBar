@@ -49,6 +49,15 @@ class HomeVC: NSViewController {
         let center = NotificationCenter.default
         center.addObserver(forName: Notification.Name(rawValue: "diskMounted"), object: nil, queue: nil, using: diskMountedNotification)
         center.addObserver(forName: Notification.Name(rawValue: "diskUnmounted"), object: nil, queue: nil, using: diskUnmountedNotification)
+        center.addObserver(forName: Notification.Name(rawValue: "rightClick"), object: nil, queue: nil, using: diskUnmountedNotification)
+    }
+    
+    func rightClick(notification: Notification) {
+        volumes.forEach { $0.unmount(callback: { (status, error) in
+            if let error = error {
+                NSAlert(error: NSError(domain: error, code: 100, userInfo: nil))
+            }
+        })}
     }
     
     func diskMountedNotification(notification: Notification) {
