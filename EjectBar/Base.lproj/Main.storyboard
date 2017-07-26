@@ -727,18 +727,19 @@
                                                             <rect key="frame" x="1" y="1" width="115" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IFZ-M1-q27">
-                                                                    <rect key="frame" x="27" y="0.0" width="61" height="18"/>
-                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                <button translatesAutoresizingMaskIntoConstraints="NO" id="IFZ-M1-q27">
+                                                                    <rect key="frame" x="8" y="0.0" width="109" height="18"/>
                                                                     <buttonCell key="cell" type="check" title="Unmount" bezelStyle="regularSquare" imagePosition="left" inset="2" id="FwJ-fa-dIM">
                                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                                         <font key="font" metaFont="system"/>
                                                                     </buttonCell>
-                                                                    <connections>
-                                                                        <action selector="checkboxToggled:" target="XfG-lQ-9wD" id="Hbz-3n-bA8"/>
-                                                                    </connections>
                                                                 </button>
                                                             </subviews>
+                                                            <constraints>
+                                                                <constraint firstItem="IFZ-M1-q27" firstAttribute="leading" secondItem="0w0-VC-GK8" secondAttribute="leading" constant="10" id="0DP-kF-JqP"/>
+                                                                <constraint firstItem="IFZ-M1-q27" firstAttribute="centerY" secondItem="0w0-VC-GK8" secondAttribute="centerY" id="LCj-BU-0Iy"/>
+                                                                <constraint firstAttribute="trailing" secondItem="IFZ-M1-q27" secondAttribute="trailing" id="Nll-0I-hOU"/>
+                                                            </constraints>
                                                             <connections>
                                                                 <outlet property="saveCheckbox" destination="FwJ-fa-dIM" id="HHO-M4-BWY"/>
                                                             </connections>

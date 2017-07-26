@@ -13,6 +13,8 @@ class HomeVC: NSViewController {
     
     @IBOutlet weak var tableView: NSTableView!
     var volumes = [Volume]()
+    
+    var plist = [String: Any]()
     var selected = Set<String>()
     
     override func viewDidLoad() {
@@ -27,13 +29,14 @@ class HomeVC: NSViewController {
     
     func readSelected() {
         
-//        guard
-//            let selectedSaved = SwiftyPlistManager.shared.fetchValue(for: "Selected", fromPlistWithName: "Settings"),
-//            let saved = selectedSaved as? Array<String>
-//        else { return }
-    
+        guard
+            let prefs = AppDelegate.loadSettings(),
+            let saved = prefs["Selected"] as? Array<String>
+        else { return }
         
-//        selected = Set(saved)
+        plist = prefs
+        selected = Set(saved)
+        
         tableView.reloadData()
     }
     
@@ -136,11 +139,10 @@ extension HomeVC: NSTableViewDelegate {
             selected.remove(volume.name)
         }
         
-//        SwiftyPlistManager.shared.save(Array(selected), forKey: "Selected", toPlistWithName: "Settings") { (err) in
-//            DispatchQueue.main.sync {
-//                sender.isEnabled = true
-//            }
-//        }
+        plist["Selected"] = Array(selected)
+        AppDelegate.writeSettings(plist)
+        
+        sender.isEnabled = true
     }
     
     func checkboxState(_ volume: Volume) -> NSControl.StateValue {

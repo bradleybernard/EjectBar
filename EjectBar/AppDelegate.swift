@@ -17,22 +17,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     var plist = [String: Any]()
     
-    func loadSettings() {
+    static func loadSettings() -> [String: Any]? {
         
         guard
             let path = createSettings(),
             let data = NSData(contentsOfFile: path.path)
-        else { return }
+        else { return nil }
         
         guard
             let wrapped = try? PropertyListSerialization.propertyList(from: data as Data, options: [], format: nil) as? [String: Any],
             let dict = wrapped
-        else { return }
+        else { return nil }
         
-        plist = dict
+        return dict
     }
     
-    func createSettings() -> URL? {
+    static func createSettings() -> URL? {
         
         guard
             let source = Bundle.main.path(forResource: AppDelegate.settingsFile, ofType: "plist"),
@@ -53,14 +53,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return dest
     }
     
-    func writeSettings() {
-        guard let path = plistURL() else { return }
+    static func writeSettings(_ prefs: [String: Any]) {
+        guard let path = AppDelegate.plistURL() else { return }
         
-        let data = NSKeyedArchiver.archivedData(withRootObject: plist)
-        try? data.write(to: path)
+        do {
+            if #available(OSX 10.13, *) {
+                try (prefs as NSDictionary).write(to: path)
+            } else {
+                (prefs as NSDictionary).write(to: path, atomically: true)
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
     }
     
-    func plistURL() -> URL? {
+    static func plistURL() -> URL? {
         guard let url = try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false) else { return nil }
         
         var dest = url
@@ -72,11 +79,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        loadSettings()
+//        guard let settings = AppDelegate.loadSettings() else { return }
+//        plist = settings
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-        writeSettings()
+//        AppDelegate.writeSettings(plist)
     }
 }
 
