@@ -15,17 +15,14 @@ class WindowController: NSWindowController {
         
         guard let window = window else { return }
         window.title = "Mounted Volumes"
-        
-        window.addTitlebarAccessoryViewController(titleBarButton(title: "Quit", selector: #selector(WindowController.quit)))
-        window.addTitlebarAccessoryViewController(titleBarButton(title: "Hide", selector: #selector(WindowController.hide)))
-        window.styleMask.insert(NSWindowStyleMask.fullSizeContentView)
-
+        window.styleMask.remove(NSWindowStyleMask.closable)
+        window.styleMask.remove(NSWindowStyleMask.miniaturizable)
     }
     
-    func titleBarButton(title: String, selector: Selector) -> NSTitlebarAccessoryViewController {
-        let button = NSButton(title: title, target: nil, action: selector)
+    func titleBarButton(title: String) -> NSTitlebarAccessoryViewController {
+        let button = NSTextField(labelWithString: title)
         let accessory = NSTitlebarAccessoryViewController()
-        accessory.layoutAttribute = .right
+        accessory.layoutAttribute = .bottom
         accessory.view = button
         return accessory
     }

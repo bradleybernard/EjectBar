@@ -128,6 +128,26 @@ class HomeVC: NSViewController {
             self.tableView.reloadData()
         }
     }
+    
+    func checkboxSelected(sender: NSButton) {
+        let volume = volumes[sender.tag]
+        
+        sender.isEnabled = false
+        if sender.state == NSOnState {
+            selected.insert(volume.name)
+        } else if sender.state == NSOffState {
+            selected.remove(volume.name)
+        }
+        
+        plist["Selected"] = Array(selected)
+        AppDelegate.writeSettings(plist)
+        
+        sender.isEnabled = true
+    }
+    
+    func checkboxState(_ volume: Volume) -> NSCellStateValue {
+        return (selected.contains(volume.name) ? NSOnState : NSOffState)
+    }
 }
 
 extension HomeVC: NSTableViewDelegate {
@@ -177,24 +197,8 @@ extension HomeVC: NSTableViewDelegate {
         return nil
     }
     
-    func checkboxSelected(sender: NSButton) {
-        let volume = volumes[sender.tag]
-        
-        sender.isEnabled = false
-        if sender.state == NSOnState {
-            selected.insert(volume.name)
-        } else if sender.state == NSOffState {
-            selected.remove(volume.name)
-        }
-        
-        plist["Selected"] = Array(selected)
-        AppDelegate.writeSettings(plist)
-        
-        sender.isEnabled = true
-    }
-    
-    func checkboxState(_ volume: Volume) -> NSCellStateValue {
-        return (selected.contains(volume.name) ? NSOnState : NSOffState)
+    func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
+        return false
     }
 }
 
