@@ -131,11 +131,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func hideAction(sender: Any) {
-        print("hide")
+        let center = NotificationCenter.default
+        center.post(name:Notification.Name(rawValue: "hideApplication"), object: nil, userInfo: nil)
     }
     
     func showAction(sender: Any) {
-        print("show")
+        let center = NotificationCenter.default
+        center.post(name:Notification.Name(rawValue: "showApplication"), object: nil, userInfo: nil)
     }
     
     func ejectAction(sender: Any) {

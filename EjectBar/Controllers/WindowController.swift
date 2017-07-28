@@ -25,11 +25,28 @@ class WindowController: NSWindowController {
         return accessory
     }
     
-    func hide() {
+    @IBAction func ejectAtion(_ sender: Any) {
+        let center = NotificationCenter.default
+        center.post(name:Notification.Name(rawValue: "ejectFavorites"), object: nil, userInfo: nil)
+    }
+    
+    @IBAction func hideAction(_ sender: Any) {
         window?.orderOut(self)
     }
     
-    func quit() {
+    @IBAction func quitAction(_ sender: Any) {
         NSApplication.shared().terminate(self)
+    }
+    
+    @IBAction func aboutAction(_ sender: Any) {
+        let alert = NSAlert()
+        alert.addButton(withTitle: "OK")
+        alert.messageText = "About EjectBar"
+        alert.informativeText = "Created by Bradley Bernard. Copyright 2017. https://bradleybernard.com/"
+        alert.runModal()
+    }
+    
+    @IBAction func refreshAction(_ sender: Any) {
+        //do nothing
     }
 }

@@ -99,9 +99,9 @@ class HomeVC: NSViewController {
         }
         
         volumes.append(volume)
-        postVolumeCount()
         
         DispatchQueue.main.sync {
+            postVolumeCount()
             self.tableView.reloadData()
         }
     }
@@ -123,9 +123,9 @@ class HomeVC: NSViewController {
         else { return }
         
         volumes = volumes.filter { $0.id != volume.id }
-        postVolumeCount()
         
         DispatchQueue.main.sync {
+            postVolumeCount()
             self.tableView.reloadData()
         }
     }
