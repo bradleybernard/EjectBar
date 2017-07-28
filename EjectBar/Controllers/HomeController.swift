@@ -131,9 +131,12 @@ class HomeVC: NSViewController {
     }
     
     func checkboxSelected(sender: NSButton) {
-        let volume = volumes[sender.tag]
+        
+        let row = self.tableView.row(for: sender)
+        let volume = volumes[row]
         
         sender.isEnabled = false
+        
         if sender.state == NSOnState {
             selected.insert(volume.name)
         } else if sender.state == NSOffState {
@@ -190,7 +193,6 @@ extension HomeVC: NSTableViewDelegate {
                 let selected = (cell as! SelectedTableCell)
                 selected.saveCheckbox.state = checkboxState(volume)
                 selected.saveCheckbox.action = #selector(HomeVC.checkboxSelected)
-                selected.saveCheckbox.tag = row
             }
             return cell
         }
