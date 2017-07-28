@@ -32,10 +32,6 @@ class HomeVC: NSViewController {
         readSelected()
     }
     
-    override func viewDidAppear() {
-        diskCountNotify()
-    }
-    
     func readSelected() {
         
         guard
@@ -52,24 +48,25 @@ class HomeVC: NSViewController {
     func setupNotificationListeners() {
         
         let center = NotificationCenter.default
-        center.addObserver(forName: Notification.Name(rawValue: "diskMounted"), object: nil, queue: nil, using: diskMountedNotification)
-        center.addObserver(forName: Notification.Name(rawValue: "diskUnmounted"), object: nil, queue: nil, using: diskUnmountedNotification)
-        center.addObserver(forName: Notification.Name(rawValue: "rightClick"), object: nil, queue: nil, using: rightClick)
-        center.addObserver(forName: Notification.Name(rawValue: "leftClick"), object: nil, queue: nil, using: leftClick)
-        center.addObserver(forName: Notification.Name(rawValue: "queryCount"), object: nil, queue: nil, using: queryCount)
+        center.addObserver(forName: Notification.Name(rawValue: "diskMounted"), object: nil, queue: nil, using: diskMounted)
+        center.addObserver(forName: Notification.Name(rawValue: "diskUnmounted"), object: nil, queue: nil, using: diskUnmounted)
+        center.addObserver(forName: Notification.Name(rawValue: "ejectFavorites"), object: nil, queue: nil, using: ejectFavorites)
+        center.addObserver(forName: Notification.Name(rawValue: "showApplication"), object: nil, queue: nil, using: showApplication)
+        center.addObserver(forName: Notification.Name(rawValue: "hideApplication"), object: nil, queue: nil, using: hideApplication)
+        center.addObserver(forName: Notification.Name(rawValue: "updateVolumeCount"), object: nil, queue: nil, using: updateVolumeCount)
     }
     
-    func queryCount(notification: Notification) {
-        self.diskCountNotify()
+    func updateVolumeCount(notification: Notification) {
+        postVolumeCount()
     }
     
-    func rightClick(notification: Notification) {
+    func ejectFavorites(notification: Notification) {
         volumes.forEach { (volume) in
             if selected.contains(volume.name) {
                 volume.unmount(callback: { (status, error) in
                     if let error = error {
                         let alert = NSAlert(error: NSError(domain: error, code: 100, userInfo: nil))
-                        DispatchQueue.main.sync {
+                        DispatchQueue.main.async {
                             // Silence unused response
                             _ = alert.runModal()
                         }
@@ -79,14 +76,18 @@ class HomeVC: NSViewController {
         }
     }
     
-    func leftClick(notification: Notification) {
+    func showApplication(notification: Notification) {
         guard let window = view.window else { return }
         
         window.makeKeyAndOrderFront(self)
         NSRunningApplication.current().activate(options: .activateIgnoringOtherApps)
     }
     
-    func diskMountedNotification(notification: Notification) {
+    func hideApplication(notification: Notification) {
+        view.window?.orderOut(self)
+    }
+    
+    func diskMounted(notification: Notification) {
         
         guard
             let object = notification.object,
@@ -98,7 +99,7 @@ class HomeVC: NSViewController {
         }
         
         volumes.append(volume)
-        diskCountNotify()
+        postVolumeCount()
         
         DispatchQueue.main.sync {
             self.tableView.reloadData()
@@ -109,12 +110,12 @@ class HomeVC: NSViewController {
         return volumes.reduce(0) { $0 + ($1.id == volume.id ? 1 : 0) } == 1
     }
     
-    func diskCountNotify() {
+    func postVolumeCount() {
         let center = NotificationCenter.default
-        center.post(name:Notification.Name(rawValue: "diskCount"), object: nil, userInfo: ["count": volumes.count])
+        center.post(name:Notification.Name(rawValue: "postVolumeCount"), object: nil, userInfo: ["count": volumes.count])
     }
     
-    func diskUnmountedNotification(notification: Notification) {
+    func diskUnmounted(notification: Notification) {
         
         guard
             let object = notification.object,
@@ -122,7 +123,7 @@ class HomeVC: NSViewController {
         else { return }
         
         volumes = volumes.filter { $0.id != volume.id }
-        diskCountNotify()
+        postVolumeCount()
         
         DispatchQueue.main.sync {
             self.tableView.reloadData()

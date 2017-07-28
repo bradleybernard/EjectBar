@@ -17,6 +17,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     var plist = [String: Any]()
     let statusItem = NSStatusBar.system().statusItem(withLength: NSVariableStatusItemLength)
+    let menu = NSMenu()
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         setupMenu()
@@ -29,11 +30,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func setupNotificationListeners() {
         let center = NotificationCenter.default
-        center.addObserver(forName: Notification.Name(rawValue: "diskCount"), object: nil, queue: nil, using: diskCount)
-        center.post(name:Notification.Name(rawValue: "queryCount"), object: nil, userInfo: nil)
+        center.addObserver(forName: Notification.Name(rawValue: "postVolumeCount"), object: nil, queue: nil, using: postVolumeCount)
+        center.post(name:Notification.Name(rawValue: "updateVolumeCount"), object: nil, userInfo: nil)
     }
     
-    func diskCount(notification: Notification) {
+    func postVolumeCount(notification: Notification) {
         
         guard
             let info = notification.userInfo,
@@ -101,12 +102,48 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func setupMenu() {
         guard let button = statusItem.button else { return }
         
+        menu.addItem(NSMenuItem(title: "Eject Favorites", action: #selector(AppDelegate.ejectAction(sender:)), keyEquivalent: "e"))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "Show Window", action: #selector(AppDelegate.showAction(sender:)), keyEquivalent: "s"))
+        menu.addItem(NSMenuItem(title: "Hide Window", action: #selector(AppDelegate.hideAction(sender:)), keyEquivalent: "h"))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "Quit", action: #selector(AppDelegate.quitAction(sender:)), keyEquivalent: "q"))
+        statusItem.menu = menu
+        
         button.image = NSImage(named: "EjectIcon")
+        button.target = self
+        button.action = #selector(self.statusBarButtonClicked(sender:))
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-        statusItem.action = #selector(AppDelegate.menuClick)
     }
     
-    func menuClick(sender: NSStatusItem) {
+    func statusBarButtonClicked(sender: NSStatusBarButton) {
+        let event = NSApp.currentEvent!
+        
+        if event.type == NSEventType.rightMouseUp {
+            print("Right click")
+        } else {
+            print("Left click")
+        }
+    }
+    
+    func quitAction(sender: Any) {
+        NSApplication.shared().terminate(self)
+    }
+    
+    func hideAction(sender: Any) {
+        print("hide")
+    }
+    
+    func showAction(sender: Any) {
+        print("show")
+    }
+    
+    func ejectAction(sender: Any) {
+        let center = NotificationCenter.default
+        center.post(name:Notification.Name(rawValue: "ejectFavorites"), object: nil, userInfo: nil)
+    }
+    
+    func menuClick(sender: NSStatusBarButton) {
         
         guard let event = NSApp.currentEvent else { return }
         let center = NotificationCenter.default

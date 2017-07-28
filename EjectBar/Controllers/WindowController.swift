@@ -15,8 +15,6 @@ class WindowController: NSWindowController {
         
         guard let window = window else { return }
         window.title = "Mounted Volumes"
-        window.styleMask.remove(NSWindowStyleMask.closable)
-        window.styleMask.remove(NSWindowStyleMask.miniaturizable)
     }
     
     func titleBarButton(title: String) -> NSTitlebarAccessoryViewController {
@@ -32,6 +30,6 @@ class WindowController: NSWindowController {
     }
     
     func quit() {
-        NSApplication.shared().terminate(nil)
+        NSApplication.shared().terminate(self)
     }
 }
