@@ -42,7 +42,7 @@ class WindowController: NSWindowController {
         let alert = NSAlert()
         alert.addButton(withTitle: "OK")
         alert.messageText = "About EjectBar"
-        alert.informativeText = "Created by Bradley Bernard. Copyright 2017. https://bradleybernard.com/"
+        alert.informativeText = "Copyright © 2017 Bradley Bernard. All rights reserved. https://bradleybernard.com/"
         alert.runModal()
     }
     

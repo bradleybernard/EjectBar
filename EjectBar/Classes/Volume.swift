@@ -17,6 +17,10 @@ typealias MAppDef = (DADisk, UnsafeMutableRawPointer?)
 typealias MAppRet = Unmanaged<DADissenter>?
 typealias MAppCallback = (DADisk, UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>?
 
+typealias CAppDef = (DADisk, CFArray)
+typealias CAppRet = Void
+typealias CAppCallback = (DADisk, CFArray) -> Void
+
 enum VolumeComponent: Int {
     case root = 1
 }
@@ -66,7 +70,7 @@ struct Volume {
         let wrapper = CallbackWrapper<UnmountDef, UnmountRet>(callback: callback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
 
-        DADiskUnmount(disk, DADiskUnmountOptions(kDADiskMountOptionWhole & kDADiskUnmountOptionForce), { (volume, dissenter, context) in
+        DADiskUnmount(disk, DADiskUnmountOptions(kDADiskUnmountOptionWhole & kDADiskUnmountOptionForce), { (volume, dissenter, context) in
 
             guard let context = context else {
                 return
@@ -139,14 +143,21 @@ class VolumeListener {
     
     static let instance = VolumeListener()
     var callbacks = [CallbackWrapper<MAppDef, MAppRet>]()
+    var listeners = [CallbackWrapper<CAppDef, CAppRet>]()
     
     deinit {
+        
         callbacks.forEach {
             let address = UnsafeMutableRawPointer(Unmanaged.passUnretained($0).toOpaque())
             let _ = Unmanaged<CallbackWrapper<MAppDef, MAppRet>>.fromOpaque(address).takeRetainedValue()
         }
-        
         callbacks.removeAll()
+        
+        listeners.forEach {
+            let address = UnsafeMutableRawPointer(Unmanaged.passUnretained($0).toOpaque())
+            let _ = Unmanaged<CallbackWrapper<CAppDef, CAppRet>>.fromOpaque(address).takeRetainedValue()
+        }
+        listeners.removeAll()
         
         guard let session = SessionWrapper.session else { return }
         DASessionSetDispatchQueue(session, nil)
@@ -162,6 +173,31 @@ class VolumeListener {
         
         mountApproval(session)
         unmountApproval(session)
+        changedListener(session)
+    }
+    
+    func changedListener(_ session: DASession) {
+        
+        let wrapper = CallbackWrapper<CAppDef, CAppRet>(callback: changedCallback)
+        let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
+        
+        DARegisterDiskDescriptionChangedCallback(session, nil, nil, { (disk, info, context) in
+            
+            guard let context = context else {
+                return
+            }
+            
+            let wrapped = Unmanaged<CallbackWrapper<CAppDef, CAppRet>>.fromOpaque(context).takeUnretainedValue()
+            return wrapped.callback((disk, info))
+            
+        }, address)
+        
+        listeners.append(wrapper)
+    }
+    
+    func changedCallback(disk: DADisk, keys: CFArray) {
+        let center = NotificationCenter.default
+        center.post(name:Notification.Name(rawValue: "resetTableView"), object: nil, userInfo: nil)
     }
     
     func mountApproval(_ session: DASession) {

@@ -54,6 +54,16 @@ class HomeVC: NSViewController {
         center.addObserver(forName: Notification.Name(rawValue: "showApplication"), object: nil, queue: nil, using: showApplication)
         center.addObserver(forName: Notification.Name(rawValue: "hideApplication"), object: nil, queue: nil, using: hideApplication)
         center.addObserver(forName: Notification.Name(rawValue: "updateVolumeCount"), object: nil, queue: nil, using: updateVolumeCount)
+        center.addObserver(forName: Notification.Name(rawValue: "resetTableView"), object: nil, queue: nil, using: resetTableView)
+        
+    }
+    
+    func resetTableView(notification: Notification) {
+        DispatchQueue.main.sync {
+            volumes = Volume.queryVolumes()
+            postVolumeCount()
+            self.tableView.reloadData()
+        }
     }
     
     func updateVolumeCount(notification: Notification) {

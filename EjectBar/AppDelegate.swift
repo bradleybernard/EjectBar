@@ -120,9 +120,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let event = NSApp.currentEvent!
         
         if event.type == NSEventType.rightMouseUp {
-            print("Right click")
+            //
         } else {
-            print("Left click")
+            //
         }
     }
     
