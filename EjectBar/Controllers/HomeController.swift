@@ -59,7 +59,19 @@ class HomeVC: NSViewController {
     }
     
     func resetTableView(notification: Notification) {
-        DispatchQueue.main.sync {
+        
+        guard
+            let dict = notification.userInfo,
+            let background = dict["background"] as? Bool
+        else { return }
+        
+        if background {
+            DispatchQueue.main.sync {
+                volumes = Volume.queryVolumes()
+                postVolumeCount()
+                self.tableView.reloadData()
+            }
+        } else {
             volumes = Volume.queryVolumes()
             postVolumeCount()
             self.tableView.reloadData()
@@ -75,8 +87,11 @@ class HomeVC: NSViewController {
             if selected.contains(volume.name) {
                 volume.unmount(callback: { (status, error) in
                     if let error = error {
-                        let alert = NSAlert(error: NSError(domain: error, code: 100, userInfo: nil))
                         DispatchQueue.main.async {
+                            let alert = NSAlert()
+                            alert.messageText = volume.name + " " + error.localizedDescription
+                            alert.alertStyle = .critical
+                            alert.addButton(withTitle: "OK")
                             // Silence unused response
                             _ = alert.runModal()
                         }

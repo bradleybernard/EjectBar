@@ -9,9 +9,9 @@
 
 import Foundation
 
-typealias UnmountDef = (Bool, String?)
+typealias UnmountDef = (Bool, NSError?)
 typealias UnmountRet = Void
-typealias UnmountCallback = (Bool, String?) -> Void
+typealias UnmountCallback = (Bool, NSError?) -> Void
 
 typealias MAppDef = (DADisk, UnsafeMutableRawPointer?)
 typealias MAppRet = Unmanaged<DADissenter>?
@@ -78,13 +78,43 @@ struct Volume {
 
             let wrapped = Unmanaged<CallbackWrapper<UnmountDef, UnmountRet>>.fromOpaque(context).takeRetainedValue()
 
-            if let error = dissenter {
-                wrapped.callback((false, String(describing: DADissenterGetStatusString(error))))
+            if let dissenter = dissenter {
+                let code = DADissenterGetStatus(dissenter)
+                let hex = String(format: "%2X", code).lowercased()
+                let error = NSError(domain: "Disk unmount failed. Error code: 0x" + hex + ".", code: -1, userInfo: nil)
+                wrapped.callback((false,  error))
             } else {
                 wrapped.callback((true, nil))
             }
 
         }, address)
+    }
+    
+    func errorCodeToString(code: DAReturn) -> String {
+        
+        let status = Int(code)
+        
+        if status == kDAReturnSuccess {
+            return "Successful"
+        } else if status == kDAReturnError {
+            return ""
+        }
+        
+        return ""
+//        
+//        public var kDAReturnSuccess: Int { get }
+//        public var kDAReturnError: Int { get } /* ( 0xF8DA0001 ) */
+//        public var kDAReturnBusy: Int { get } /* ( 0xF8DA0002 ) */
+//        public var kDAReturnBadArgument: Int { get } /* ( 0xF8DA0003 ) */
+//        public var kDAReturnExclusiveAccess: Int { get } /* ( 0xF8DA0004 ) */
+//        public var kDAReturnNoResources: Int { get } /* ( 0xF8DA0005 ) */
+//        public var kDAReturnNotFound: Int { get } /* ( 0xF8DA0006 ) */
+//        public var kDAReturnNotMounted: Int { get } /* ( 0xF8DA0007 ) */
+//        public var kDAReturnNotPermitted: Int { get } /* ( 0xF8DA0008 ) */
+//        public var kDAReturnNotPrivileged: Int { get } /* ( 0xF8DA0009 ) */
+//        public var kDAReturnNotReady: Int { get } /* ( 0xF8DA000A ) */
+//        public var kDAReturnNotWritable: Int { get } /* ( 0xF8DA000B ) */
+//        public var kDAReturnUnsupported: Int { get } /* ( 0xF8DA000C ) */
     }
 
     static func fromURL(_ url: URL) -> Volume? {
@@ -197,7 +227,7 @@ class VolumeListener {
     
     func changedCallback(disk: DADisk, keys: CFArray) {
         let center = NotificationCenter.default
-        center.post(name:Notification.Name(rawValue: "resetTableView"), object: nil, userInfo: nil)
+        center.post(name:Notification.Name(rawValue: "resetTableView"), object: nil, userInfo: ["background": true])
     }
     
     func mountApproval(_ session: DASession) {

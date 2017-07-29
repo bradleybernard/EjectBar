@@ -47,6 +47,7 @@ class WindowController: NSWindowController {
     }
     
     @IBAction func refreshAction(_ sender: Any) {
-        //do nothing
+         let center = NotificationCenter.default
+         center.post(name:Notification.Name(rawValue: "resetTableView"), object: nil, userInfo: ["background": false])
     }
 }
