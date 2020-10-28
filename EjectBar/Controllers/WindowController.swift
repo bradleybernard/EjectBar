@@ -17,10 +17,13 @@ class WindowController: NSWindowController {
     }
     
     func titleBarButton(title: String) -> NSTitlebarAccessoryViewController {
-        let button = NSTextField(labelWithString: title)
+        let textField = NSTextField()
+        textField.isEditable = false
+        textField.isSelectable = false
+
         let accessory = NSTitlebarAccessoryViewController()
         accessory.layoutAttribute = .bottom
-        accessory.view = button
+        accessory.view = textField
 
         return accessory
     }
