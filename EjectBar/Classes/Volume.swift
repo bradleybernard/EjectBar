@@ -27,6 +27,7 @@ enum VolumeComponent: Int {
 
 enum VolumeReservedNames: String {
     case EFI = "EFI"
+    case Volumes = "Volumes"
 }
 
 class CallbackWrapper<T, U> {
@@ -41,18 +42,17 @@ class SessionWrapper {
 }
 
 struct Volume {
+    let id: String
+    let name: String
+    let device: String
+    let path: CFURL
+    let disk: DADisk
+    let size: Int
+    let ejectable: Bool
+    let removable: Bool
 
-    var id: String
-    var name: String
-    var device: String
-    var path: CFURL
-    var disk: DADisk
-    var size: Int
-    var ejectable: Bool
-    var removable: Bool
-
-    static let keys: [URLResourceKey] = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
-    static let set: Set<URLResourceKey> = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
+    private static let keys: [URLResourceKey] = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
+    private static let set: Set<URLResourceKey> = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
 
     init(id: String, name: String, device: String, path: CFURL, disk: DADisk, size: Int, ejectable: Bool, removable: Bool) {
         self.id = id
@@ -66,12 +66,10 @@ struct Volume {
     }
 
     func unmount(callback: @escaping UnmountCallback) {
-
         let wrapper = CallbackWrapper<UnmountDef, UnmountRet>(callback: callback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
 
         DADiskUnmount(disk, DADiskUnmountOptions(kDADiskUnmountOptionWhole & kDADiskUnmountOptionForce), { (volume, dissenter, context) in
-
             guard let context = context else {
                 return
             }
@@ -89,9 +87,22 @@ struct Volume {
 
         }, address)
     }
-    
+
+    //        public var kDAReturnSuccess: Int { get }
+    //        public var kDAReturnError: Int { get } /* ( 0xF8DA0001 ) */
+    //        public var kDAReturnBusy: Int { get } /* ( 0xF8DA0002 ) */
+    //        public var kDAReturnBadArgument: Int { get } /* ( 0xF8DA0003 ) */
+    //        public var kDAReturnExclusiveAccess: Int { get } /* ( 0xF8DA0004 ) */
+    //        public var kDAReturnNoResources: Int { get } /* ( 0xF8DA0005 ) */
+    //        public var kDAReturnNotFound: Int { get } /* ( 0xF8DA0006 ) */
+    //        public var kDAReturnNotMounted: Int { get } /* ( 0xF8DA0007 ) */
+    //        public var kDAReturnNotPermitted: Int { get } /* ( 0xF8DA0008 ) */
+    //        public var kDAReturnNotPrivileged: Int { get } /* ( 0xF8DA0009 ) */
+    //        public var kDAReturnNotReady: Int { get } /* ( 0xF8DA000A ) */
+    //        public var kDAReturnNotWritable: Int { get } /* ( 0xF8DA000B ) */
+    //        public var kDAReturnUnsupported: Int { get } /* ( 0xF8DA000C ) */
+
     func errorCodeToString(code: DAReturn) -> String {
-        
         let status = Int(code)
         
         if status == kDAReturnSuccess {
@@ -101,24 +112,9 @@ struct Volume {
         }
         
         return ""
-//        
-//        public var kDAReturnSuccess: Int { get }
-//        public var kDAReturnError: Int { get } /* ( 0xF8DA0001 ) */
-//        public var kDAReturnBusy: Int { get } /* ( 0xF8DA0002 ) */
-//        public var kDAReturnBadArgument: Int { get } /* ( 0xF8DA0003 ) */
-//        public var kDAReturnExclusiveAccess: Int { get } /* ( 0xF8DA0004 ) */
-//        public var kDAReturnNoResources: Int { get } /* ( 0xF8DA0005 ) */
-//        public var kDAReturnNotFound: Int { get } /* ( 0xF8DA0006 ) */
-//        public var kDAReturnNotMounted: Int { get } /* ( 0xF8DA0007 ) */
-//        public var kDAReturnNotPermitted: Int { get } /* ( 0xF8DA0008 ) */
-//        public var kDAReturnNotPrivileged: Int { get } /* ( 0xF8DA0009 ) */
-//        public var kDAReturnNotReady: Int { get } /* ( 0xF8DA000A ) */
-//        public var kDAReturnNotWritable: Int { get } /* ( 0xF8DA000B ) */
-//        public var kDAReturnUnsupported: Int { get } /* ( 0xF8DA000C ) */
     }
 
     static func fromURL(_ url: URL) -> Volume? {
-
         guard
             let session = SessionWrapper.session,
             let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, url as CFURL)
@@ -128,7 +124,6 @@ struct Volume {
     }
     
     static func fromDisk(_ disk: DADisk) -> Volume? {
-        
         guard
             let dict = DADiskCopyDescription(disk),
             let diskInfo = dict as? [NSString: Any],
@@ -154,29 +149,28 @@ struct Volume {
     }
 
     static func isVolumeURL(_ url: URL) -> Bool {
-        return (url.pathComponents.count > 1 && url.pathComponents[VolumeComponent.root.rawValue] == "Volumes")
+        return url.pathComponents.count > 1
+        && url.pathComponents[VolumeComponent.root.rawValue] == VolumeReservedNames.Volumes.rawValue
     }
 
     static func queryVolumes() -> [Volume] {
-
         let paths = FileManager().mountedVolumeURLs(includingResourceValuesForKeys: keys, options: [])
 
         guard let urls = paths else {
             return []
         }
 
-        return urls.filter { Volume.isVolumeURL($0) }.flatMap { Volume.fromURL($0) }
+        return urls.filter { Volume.isVolumeURL($0) }.compactMap { Volume.fromURL($0) }
     }
 }
 
 class VolumeListener {
+    static let shared = VolumeListener()
     
-    static let instance = VolumeListener()
-    var callbacks = [CallbackWrapper<MAppDef, MAppRet>]()
-    var listeners = [CallbackWrapper<CAppDef, CAppRet>]()
+    private var callbacks = [CallbackWrapper<MAppDef, MAppRet>]()
+    private var listeners = [CallbackWrapper<CAppDef, CAppRet>]()
     
     deinit {
-        
         callbacks.forEach {
             let address = UnsafeMutableRawPointer(Unmanaged.passUnretained($0).toOpaque())
             let _ = Unmanaged<CallbackWrapper<MAppDef, MAppRet>>.fromOpaque(address).takeRetainedValue()
@@ -194,7 +188,6 @@ class VolumeListener {
     }
     
     func registerCallbacks() {
-        
         guard
             let session = SessionWrapper.session
             else { return }
@@ -207,12 +200,10 @@ class VolumeListener {
     }
     
     func changedListener(_ session: DASession) {
-        
         let wrapper = CallbackWrapper<CAppDef, CAppRet>(callback: changedCallback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
         
         DARegisterDiskDescriptionChangedCallback(session, nil, nil, { (disk, info, context) in
-            
             guard let context = context else {
                 return
             }
@@ -227,16 +218,14 @@ class VolumeListener {
     
     func changedCallback(disk: DADisk, keys: CFArray) {
         let center = NotificationCenter.default
-        center.post(name:Notification.Name(rawValue: "resetTableView"), object: nil, userInfo: ["background": true])
+        center.post(name: Notification.Name(rawValue: "resetTableView"), object: nil, userInfo: ["background": true])
     }
     
     func mountApproval(_ session: DASession) {
-        
         let wrapper = CallbackWrapper<MAppDef, MAppRet>(callback: mountCallback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
         
         DARegisterDiskMountApprovalCallback(session, nil, { (disk, context) -> Unmanaged<DADissenter>? in
-            
             guard let context = context else {
                 return nil
             }
@@ -250,20 +239,17 @@ class VolumeListener {
     }
     
     func mountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
-        
         let center = NotificationCenter.default
-        center.post(name:Notification.Name(rawValue: "diskMounted"), object: Volume.fromDisk(disk), userInfo: nil)
+        center.post(name: Notification.Name(rawValue: "diskMounted"), object: Volume.fromDisk(disk), userInfo: nil)
         
         return nil
     }
     
     func unmountApproval(_ session: DASession) {
-        
         let wrapper = CallbackWrapper<MAppDef, MAppRet>(callback: unmountCallback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
         
         DARegisterDiskUnmountApprovalCallback(session, nil, { (disk, context) -> Unmanaged<DADissenter>? in
-            
             guard let context = context else {
                 return nil
             }
@@ -277,9 +263,8 @@ class VolumeListener {
     }
     
     func unmountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
-        
         let center = NotificationCenter.default
-        center.post(name:Notification.Name(rawValue: "diskUnmounted"), object: Volume.fromDisk(disk), userInfo: nil)
+        center.post(name: Notification.Name(rawValue: "diskUnmounted"), object: Volume.fromDisk(disk), userInfo: nil)
         
         return nil
     }

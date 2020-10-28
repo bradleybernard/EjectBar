@@ -11,58 +11,46 @@ import Cocoa
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     
-    static let settingsFile: String = "Settings"
-    static let folderName: String = "EjectBar"
-    static let settingsFolder: String = "Settings"
+    private static let settingsFile: String = "Settings"
+    private static let folderName: String = "EjectBar"
+    private static let settingsFolder: String = "Settings"
     
-    var plist = [String: Any]()
-    let statusItem = NSStatusBar.system().statusItem(withLength: NSVariableStatusItemLength)
-    let menu = NSMenu()
+    private var plist = [String: Any]()
+    private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+    private let menu = NSMenu()
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         setupMenu()
         setupNotificationListeners()
     }
     
-    func applicationWillTerminate(_ aNotification: Notification) {
-        // application will terminate
-    }
-    
     func setupNotificationListeners() {
         let center = NotificationCenter.default
         center.addObserver(forName: Notification.Name(rawValue: "postVolumeCount"), object: nil, queue: nil, using: postVolumeCount)
-        center.post(name:Notification.Name(rawValue: "updateVolumeCount"), object: nil, userInfo: nil)
+        center.post(name: Notification.Name(rawValue: "updateVolumeCount"), object: nil, userInfo: nil)
     }
     
     func postVolumeCount(notification: Notification) {
-        
         guard
             let info = notification.userInfo,
             let count = info["count"] as? Int
         else { return }
         
-        DispatchQueue.main.async {
-            self.statusItem.title = String(count)
+        DispatchQueue.main.async { [weak self] in
+            self?.statusItem.title = String(count)
         }
     }
 
     static func loadSettings() -> [String: Any]? {
-        
         guard
             let path = createSettings(),
             let data = NSData(contentsOfFile: path.path)
         else { return nil }
         
-        guard
-            let wrapped = try? PropertyListSerialization.propertyList(from: data as Data, options: [], format: nil) as? [String: Any],
-            let dict = wrapped
-        else { return nil }
-        
-        return dict
+        return try? PropertyListSerialization.propertyList(from: data as Data, options: [], format: nil) as? [String: Any]
     }
     
     static func createSettings() -> URL? {
-        
         guard
             let source = Bundle.main.path(forResource: AppDelegate.settingsFile, ofType: "plist"),
             let url = try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
@@ -116,44 +104,44 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
     }
     
-    func statusBarButtonClicked(sender: NSStatusBarButton) {
-        let event = NSApp.currentEvent!
+    @objc func statusBarButtonClicked(sender: NSStatusBarButton) {
+        let event = NSApp.currentEvent
         
-        if event.type == NSEventType.rightMouseUp {
+        if event?.type == .rightMouseUp {
             //
         } else {
             //
         }
     }
     
-    func quitAction(sender: Any) {
-        NSApplication.shared().terminate(self)
+    @objc func quitAction(sender: Any) {
+        NSApplication.shared.terminate(self)
     }
     
-    func hideAction(sender: Any) {
+    @objc func hideAction(sender: Any) {
         let center = NotificationCenter.default
-        center.post(name:Notification.Name(rawValue: "hideApplication"), object: nil, userInfo: nil)
+        center.post(name: Notification.Name(rawValue: "hideApplication"), object: nil, userInfo: nil)
     }
     
-    func showAction(sender: Any) {
+    @objc func showAction(sender: Any) {
         let center = NotificationCenter.default
-        center.post(name:Notification.Name(rawValue: "showApplication"), object: nil, userInfo: nil)
+        center.post(name: Notification.Name(rawValue: "showApplication"), object: nil, userInfo: nil)
     }
     
-    func ejectAction(sender: Any) {
+    @objc func ejectAction(sender: Any) {
         let center = NotificationCenter.default
-        center.post(name:Notification.Name(rawValue: "ejectFavorites"), object: nil, userInfo: nil)
+        center.post(name: Notification.Name(rawValue: "ejectFavorites"), object: nil, userInfo: nil)
     }
     
     func menuClick(sender: NSStatusBarButton) {
-        
         guard let event = NSApp.currentEvent else { return }
+
         let center = NotificationCenter.default
         
-        if event.type == NSEventType.rightMouseUp {
-            center.post(name:Notification.Name(rawValue: "rightClick"), object: nil, userInfo: nil)
-        } else if event.type == NSEventType.leftMouseUp {
-            center.post(name:Notification.Name(rawValue: "leftClick"), object: nil, userInfo: nil)
+        if event.type == .rightMouseUp {
+            center.post(name: Notification.Name(rawValue: "rightClick"), object: nil, userInfo: nil)
+        } else if event.type == .leftMouseUp {
+            center.post(name: Notification.Name(rawValue: "leftClick"), object: nil, userInfo: nil)
         }
     }
 }

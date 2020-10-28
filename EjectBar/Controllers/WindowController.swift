@@ -13,8 +13,7 @@ class WindowController: NSWindowController {
     override func windowDidLoad() {
         super.windowDidLoad()
         
-        guard let window = window else { return }
-        window.title = "Mounted Volumes"
+        window?.title = "Mounted Volumes"
     }
     
     func titleBarButton(title: String) -> NSTitlebarAccessoryViewController {
@@ -22,12 +21,13 @@ class WindowController: NSWindowController {
         let accessory = NSTitlebarAccessoryViewController()
         accessory.layoutAttribute = .bottom
         accessory.view = button
+
         return accessory
     }
     
     @IBAction func ejectAtion(_ sender: Any) {
         let center = NotificationCenter.default
-        center.post(name:Notification.Name(rawValue: "ejectFavorites"), object: nil, userInfo: nil)
+        center.post(name: Notification.Name(rawValue: "ejectFavorites"), object: nil, userInfo: nil)
     }
     
     @IBAction func hideAction(_ sender: Any) {
@@ -35,7 +35,7 @@ class WindowController: NSWindowController {
     }
     
     @IBAction func quitAction(_ sender: Any) {
-        NSApplication.shared().terminate(self)
+        NSApplication.shared.terminate(self)
     }
     
     @IBAction func aboutAction(_ sender: Any) {
@@ -48,6 +48,6 @@ class WindowController: NSWindowController {
     
     @IBAction func refreshAction(_ sender: Any) {
          let center = NotificationCenter.default
-         center.post(name:Notification.Name(rawValue: "resetTableView"), object: nil, userInfo: ["background": false])
+         center.post(name: Notification.Name(rawValue: "resetTableView"), object: nil, userInfo: ["background": false])
     }
 }

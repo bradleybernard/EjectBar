@@ -12,8 +12,4 @@ class SelectedTableCell: NSTableCellView {
 
     @IBOutlet weak var saveCheckbox: NSButtonCell!
     
-    override func draw(_ dirtyRect: NSRect) {
-        super.draw(dirtyRect)
-    }
-    
 }
