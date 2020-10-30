@@ -21,7 +21,7 @@ class FavoritesViewController: NSViewController {
         didSet {
             DispatchQueue.main.async { [weak self] in
                 self?.tableView.reloadData()
-//                self?.tableView.resizeColumns()
+                self?.tableView.resizeColumns()
             }
         }
     }
@@ -30,15 +30,6 @@ class FavoritesViewController: NSViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-//        tableView.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier("ID"))?.sortDescriptorPrototype = NSSortDescriptor(keyPath: \Favorite.id, ascending: true)
-//        tableView.translatesAutoresizingMaskIntoConstraints = false
-//        tableView.intrinsicContentSize
-//        NSLayoutConstraint.activate([
-//            NSLayoutConstraint(item: tableView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .height, multiplier: 1, constant: tableView.intrinsicContentSize.height)
-//        ])
-
-//        tableViews.heightAnchor.constraint(equalToConstant: tableView.intrinsicContentSize.height).isActive = true
 
         setupNotifications()
         loadFavorites()

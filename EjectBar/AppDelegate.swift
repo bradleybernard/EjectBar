@@ -42,12 +42,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard let info = notification.userInfo, let count = info["count"] as? Int else {
             return
         }
-        
+
         DispatchQueue.main.async { [weak self] in
             self?.statusItem.title = String(count)
         }
     }
-    
+
     private static var settingsURL: URL? {
         guard let source = Bundle.main.path(forResource: Path.settings.rawValue, ofType: Path.plist.rawValue),
               let url = try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false) else {

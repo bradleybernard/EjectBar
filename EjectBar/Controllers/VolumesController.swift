@@ -16,7 +16,13 @@ class VolumesController: NSViewController {
     private var volumes = [Volume]() {
         didSet {
             DispatchQueue.main.async { [weak self] in
-                self?.tableView.reloadData()
+                guard let self = self else {
+                    return
+                }
+
+                self.tableView.reloadData()
+                self.tableView.resizeColumns()
+                self.postVolumeCount()
             }
         }
     }
@@ -24,16 +30,15 @@ class VolumesController: NSViewController {
     private var favorites = Set<Favorite>() {
         didSet {
             DispatchQueue.main.async { [weak self] in
-                self?.tableView.reloadData()
+                guard let self = self else {
+                    return
+                }
+
+                self.tableView.reloadData()
+                self.tableView.resizeColumns()
+                self.postVolumeCount()
             }
         }
-    }
-
-    private enum ColumnIdentifier: String {
-        case favorite = "VolumFavoriteColumn"
-        case name = "VolumeNameColumn"
-        case path = "VolumePathColumn"
-        case size = "VolumeSizeColumn"
     }
 
     override func viewDidLoad() {
@@ -42,18 +47,6 @@ class VolumesController: NSViewController {
         volumes = Volume.queryVolumes()
         VolumeListener.shared.registerCallbacks()
 
-        tableView.sortDescriptors = [
-//            NSSortDescriptor(keyPath: KeyPath<Volume, , ascending: <#T##Bool#>, comparator: <#T##Comparator##Comparator##(Any, Any) -> ComparisonResult#>)
-//            NSSortDescriptor(keyPath: \Volume.name, ascending: true),
-//            NSSortDescriptor(key: "name", ascending: true, selector: #selector(NSString.localizedCaseInsensitiveCompare(_:))),
-//            NSSortDescriptor(key: "path", ascending: true, selector: #selector(NSString.localizedCaseInsensitiveCompare(_:))),
-//            NSSortDescriptor(key: "size", ascending: true, selector: #selector(NSString.localizedCaseInsensitiveCompare(_:)))
-        ]
-        
-//        tableView.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: ColumnIdentifier.name.rawValue))?.sortDescriptorPrototype = NSSortDescriptor(keyPath: \Volume.size, ascending: true)
-
-//        tableView.sortD
-        
         setupNotificationListeners()
         readSelected()
     }
@@ -74,6 +67,7 @@ class VolumesController: NSViewController {
         NotificationCenter.default.addObserver(forName: .ejectFavorites, object: nil, queue: nil, using: ejectFavorites)
         NotificationCenter.default.addObserver(forName: .updateVolumeCount, object: nil, queue: nil, using: updateVolumeCount)
         NotificationCenter.default.addObserver(forName: .resetTableView, object: nil, queue: nil, using: resetTableView)
+        NotificationCenter.default.addObserver(forName: .favoritesUpdated, object: nil, queue: nil, using: favoritesUpdated)
     }
     
     private func resetTableView(notification: Notification) {
@@ -83,30 +77,39 @@ class VolumesController: NSViewController {
             }
             
             self.volumes = Volume.queryVolumes()
-            self.postVolumeCount()
         }
     }
     
     private func updateVolumeCount(notification: Notification) {
         postVolumeCount()
     }
+
+    private func favoritesUpdated(notification: Notification) {
+        guard let userInfo = notification.userInfo, let updatedFavorites = userInfo["favorites"] as? Set<Favorite> else {
+            return
+        }
+
+        favorites = updatedFavorites
+        postVolumeCount()
+    }
     
     private func ejectFavorites(notification: Notification) {
-        let favoritesNames = favorites.map(\.id)
+        let favoriteVolumeIds = favorites.map(\.id)
+        let favoriteVolumes = volumes.filter { volume in
+            favoriteVolumeIds.contains(volume.id)
+        }
 
-        volumes.forEach { volume in
-            if favoritesNames.contains(volume.id) {
-                volume.unmount(callback: { status, error in
-                    if let error = error {
-                        DispatchQueue.main.async {
-                            let alert = NSAlert()
-                            alert.messageText = volume.name + " " + error.localizedDescription
-                            alert.alertStyle = .critical
-                            alert.addButton(withTitle: "OK")
-                            alert.runModal()
-                        }
+        favoriteVolumes.forEach { favoriteVolume in
+            favoriteVolume.unmount() { status, error in
+                if let error = error {
+                    DispatchQueue.main.async {
+                        let alert = NSAlert()
+                        alert.messageText = favoriteVolume.name + " " + error.localizedDescription
+                        alert.alertStyle = .critical
+                        alert.addButton(withTitle: "OK")
+                        alert.runModal()
                     }
-                })
+                }
             }
         }
     }
@@ -125,14 +128,6 @@ class VolumesController: NSViewController {
         }
         
         volumes.append(volume)
-        
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-
-            self.postVolumeCount()
-        }
     }
     
     private func volumeExists(volume: Volume) -> Bool {
@@ -140,7 +135,12 @@ class VolumesController: NSViewController {
     }
     
     private func postVolumeCount() {
-        NotificationCenter.default.post(name: .postVolumeCount, object: nil, userInfo: ["count": volumes.count])
+        let favoriteVolumeIds = favorites.map(\.id)
+        let favoriteVolumes = volumes.filter { volume in
+            favoriteVolumeIds.contains(volume.id)
+        }
+
+        NotificationCenter.default.post(name: .postVolumeCount, object: nil, userInfo: ["count": favoriteVolumes.count])
     }
     
     private func diskUnmounted(notification: Notification) {
@@ -149,14 +149,6 @@ class VolumesController: NSViewController {
         }
         
         volumes = volumes.filter { $0.id != volume.id }
-        
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-
-            self.postVolumeCount()
-        }
     }
     
     @objc private func checkboxSelected(sender: NSButton) {
@@ -177,23 +169,18 @@ class VolumesController: NSViewController {
             }
         }
 
-        AppDelegate.backgroundQueue.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-
-            DispatchQueue.main.async {
-                if let appDelegate = NSApp.delegate as? AppDelegate {
-                    AppDelegate.backgroundQueue.async { [weak self] in
-                        guard let self = self else {
-                            return
-                        }
-                        
-                        appDelegate.saveFavorites(self.favorites)
+        DispatchQueue.main.async {
+            if let appDelegate = NSApp.delegate as? AppDelegate {
+                AppDelegate.backgroundQueue.async { [weak self] in
+                    guard let self = self else {
+                        return
                     }
+
+                    appDelegate.saveFavorites(self.favorites)
                 }
             }
         }
+
     }
     
     private func checkboxState(_ volume: Volume) -> NSCell.StateValue {
@@ -206,41 +193,85 @@ extension VolumesController: NSTableViewDelegate {
     private static let sizeFormatter = ByteCountFormatter()
     
     private enum CellIdentifier: String {
-        case pathCell = "VolumePathCell"
-        case nameCell = "VolumeNameCell"
-        case favoriteCell = "VolumeFavoriteCell"
-        case sizeCell = "VolumeSizeCell"
+        case favorite = "VolumeFavoriteCell"
+        case name = "VolumeNameCell"
+        case model = "VolumeModelCell"
+        case size = "VolumeSizeCell"
+        case `protocol` = "VolumeProtocolCell"
+        case device = "VolumeDeviceCell"
+        case disk = "VolumeDiskCell"
+        case path = "VolumePathCell"
+    }
+
+    private enum ColumnIdentifier: String {
+        case favorite = "VolumeFavoriteColumn"
+        case name = "VolumeNameColumn"
+        case model = "VolumeModelColumn"
+        case size = "VolumeSizeColumn"
+        case `protocol` = "VolumeProtocolColumn"
+        case device = "VolumeDeviceColumn"
+        case disk = "VolumeDiskColumn"
+        case path = "VolumePathColumn"
+
+        var cellIdentifier: CellIdentifier {
+            switch self {
+                case .favorite:
+                    return .favorite
+                case .name:
+                    return .name
+                case .size:
+                    return .size
+                case .model:
+                    return .model
+                case .disk:
+                    return .disk
+                case .path:
+                    return .path
+                case .device:
+                    return .device
+                case .protocol:
+                    return .protocol
+            }
+        }
     }
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        var text: String = ""
-        let cellIdentifier: CellIdentifier
-
         let volume = volumes[row]
-        
-        if tableColumn == tableView.tableColumns[0] {
-            cellIdentifier = .favoriteCell
-        } else if tableColumn == tableView.tableColumns[1] {
-            text = volume.name
-            cellIdentifier = .nameCell
-        } else if tableColumn == tableView.tableColumns[2] {
-            text = volume.device
-            cellIdentifier = .pathCell
-        } else if tableColumn == tableView.tableColumns[3] {
-            text = Self.sizeFormatter.string(fromByteCount: Int64(volume.size))
-            cellIdentifier = .sizeCell
-        } else {
-            fatalError("Unknown tableView column \(String(describing: tableColumn))")
-        }
 
-        let identifier = NSUserInterfaceItemIdentifier(rawValue: cellIdentifier.rawValue)
-
-        guard let tableCellView = tableView.makeView(withIdentifier: identifier, owner: nil) as? NSTableCellView else {
+        guard let columnIdentifier = tableColumn?.identifier, let tableColumnType = ColumnIdentifier(rawValue: columnIdentifier.rawValue) else {
             return nil
         }
 
-        switch cellIdentifier {
-            case .favoriteCell:
+        var text: String = ""
+
+        switch tableColumnType {
+            case .name:
+                text = volume.name
+            case .model:
+                text = volume.model
+            case .size:
+                text = Self.sizeFormatter.string(fromByteCount: Int64(volume.size))
+            case .protocol:
+                text = volume.protocol
+            case .device:
+                text = volume.device
+            case .disk:
+                text = volume.device
+            case .path:
+                text = volume.path
+            default:
+                break
+        }
+
+        let cellType = tableColumnType.cellIdentifier
+        let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: cellType.rawValue)
+
+        guard let tableCellView = tableView.makeView(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView else {
+            return nil
+        }
+
+        switch cellType {
+            case .favorite:
                 let selectedTableCell = tableCellView as? SelectedTableCell
                 selectedTableCell?.saveCheckbox.state = checkboxState(volume)
                 selectedTableCell?.saveCheckbox.action = #selector(VolumesController.checkboxSelected)
@@ -256,8 +287,12 @@ extension VolumesController: NSTableViewDelegate {
     }
 
     func tableView(_ tableView: NSTableView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
-//        (volumes as NSArray).sortedArray(using: tableView.sortDescriptors)
-//        tableView.reloadData()
+        guard let volumesSorted = (volumes as NSArray).sortedArray(using: tableView.sortDescriptors) as? [Volume] else {
+            return
+        }
+
+        volumes = volumesSorted
+        tableView.reloadData()
     }
 }
 
