@@ -30,9 +30,9 @@ extension NSTableView {
                 let width: CGFloat
 
                 if let favoriteToggleCell = cellView as? FavoriteToggleCellView {
-                    width = favoriteToggleCell.frame.width
+                    width = favoriteToggleCell.button?.intrinsicContentSize.width ?? 0
                 } else if let removeFavoriteCell = cellView as? RemoveFavoriteTableCellView {
-                    width = removeFavoriteCell.frame.width
+                    width = removeFavoriteCell.removeButton?.intrinsicContentSize.width ?? 0
                 } else {
                     width = cellView?.textField?.attributedStringValue.size().width ?? 0
                 }

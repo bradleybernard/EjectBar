@@ -12,8 +12,8 @@ import AppKit
 extension NSWindow {
 
     private static let fadeDuration = 0.35
-    private static let leftRightPadding: CGFloat = 2.0
-
+    private static let leftRightPadding: CGFloat = 2
+    
     func fadeIn(completion: (() -> Void)? = nil) {
         guard !isKeyWindow else {
             return
@@ -64,10 +64,12 @@ extension NSWindow {
             return
         }
 
+        let widthDifference = frame.size.width - tableView.frame.size.width
+
         // A window with a tableView has a 1 pixel line on left and 1 pixel line on right,
         // so we don't want to shrink the window by 2 pixels each time we redraw the tableView.
         // If the difference in width's is 2, we don't change the frame
-        guard frame.size.width - tableView.frame.size.width != Self.leftRightPadding else {
+        guard widthDifference != Self.leftRightPadding else {
             return
         }
 

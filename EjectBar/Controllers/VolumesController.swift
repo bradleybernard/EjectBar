@@ -240,7 +240,7 @@ extension VolumesController: NSTableViewDelegate {
         switch cellType {
             case .favorite:
                 let favoriteToggleCell = tableCellView as? FavoriteToggleCellView
-                favoriteToggleCell?.checkbox.state = checkboxState(volume)
+                favoriteToggleCell?.buttonCell.state = checkboxState(volume)
                 favoriteToggleCell?.delegate = self
             default:
                 tableCellView.textField?.stringValue = text
@@ -277,7 +277,7 @@ extension VolumesController: NSTableViewDataSource {
 extension VolumesController: FavoriteToggleCellDelegate {
 
     func favoriteToggleCellTapped(_ favoriteToggleCell: FavoriteToggleCellView) {
-        guard let checkbox = favoriteToggleCell.checkbox else {
+        guard let checkbox = favoriteToggleCell.buttonCell else {
             return
         }
 
@@ -302,7 +302,9 @@ extension VolumesController: FavoriteToggleCellDelegate {
                     }
 
                     appDelegate.saveFavorites(self.favorites)
-                    checkbox.isEnabled = true
+                    DispatchQueue.main.async {
+                        checkbox.isEnabled = true
+                    }
                 }
             }
         }

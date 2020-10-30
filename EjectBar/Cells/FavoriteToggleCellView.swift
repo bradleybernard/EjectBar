@@ -16,7 +16,8 @@ class FavoriteToggleCellView: NSTableCellView {
 
     weak var delegate: FavoriteToggleCellDelegate?
 
-    @IBOutlet weak var checkbox: NSButtonCell!
+    @IBOutlet weak var button: NSButton!
+    @IBOutlet weak var buttonCell: NSButtonCell!
 
     @IBAction func checkboxAction(_ sender: Any) {
         delegate?.favoriteToggleCellTapped(self)

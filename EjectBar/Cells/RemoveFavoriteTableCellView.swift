@@ -16,6 +16,8 @@ class RemoveFavoriteTableCellView: NSTableCellView {
 
     weak var delegate: RemoveFavoriteCellDelegate?
 
+    @IBOutlet weak var removeButton: NSButton!
+    
     @IBAction func tappedRemoveButton(_ sender: Any) {
         delegate?.removeFavoriteCellTapped(self)
     }

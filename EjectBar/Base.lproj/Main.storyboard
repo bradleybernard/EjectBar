@@ -826,7 +826,8 @@
                                                                 <constraint firstAttribute="trailing" secondItem="IFZ-M1-q27" secondAttribute="trailing" id="Nll-0I-hOU"/>
                                                             </constraints>
                                                             <connections>
-                                                                <outlet property="checkbox" destination="FwJ-fa-dIM" id="HHO-M4-BWY"/>
+                                                                <outlet property="button" destination="IFZ-M1-q27" id="Sc4-vY-8eh"/>
+                                                                <outlet property="buttonCell" destination="FwJ-fa-dIM" id="HHO-M4-BWY"/>
                                                             </connections>
                                                         </tableCellView>
                                                     </prototypeCellViews>
@@ -1110,25 +1111,25 @@
         <scene sceneID="SgU-CQ-1Ok">
             <objects>
                 <viewController title="Favorites" storyboardIdentifier="FavoritesViewController" showSeguePresentationStyle="single" id="POc-cd-m71" customClass="FavoritesViewController" customModule="EjectBar" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="h5i-Te-HWA">
-                        <rect key="frame" x="0.0" y="0.0" width="479" height="300"/>
+                    <view key="view" misplaced="YES" id="h5i-Te-HWA">
+                        <rect key="frame" x="0.0" y="0.0" width="479" height="276"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pUr-B8-bvc">
-                                <rect key="frame" x="0.0" y="0.0" width="479" height="300"/>
+                                <rect key="frame" x="0.0" y="0.0" width="479" height="204"/>
                                 <clipView key="contentView" id="z5h-PO-4WO">
-                                    <rect key="frame" x="1" y="0.0" width="477" height="299"/>
+                                    <rect key="frame" x="1" y="0.0" width="477" height="203"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="FST-wY-4oM" viewBased="YES" id="2SG-Ha-Bnd">
-                                            <rect key="frame" x="0.0" y="0.0" width="477" height="274"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="477" height="178"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <tableViewGridLines key="gridStyleMask" vertical="YES" horizontal="YES"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
-                                                <tableColumn identifier="ID" width="116" minWidth="40" maxWidth="1000" id="qf1-Wf-hro">
+                                                <tableColumn identifier="FavoriteIDColumn" width="116" minWidth="40" maxWidth="1000" id="qf1-Wf-hro">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="ID">
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1161,7 +1162,7 @@
                                                         </tableCellView>
                                                     </prototypeCellViews>
                                                 </tableColumn>
-                                                <tableColumn identifier="FavoriteNameCell" width="129" minWidth="40" maxWidth="1000" id="frY-RX-8v8">
+                                                <tableColumn identifier="FavoriteNameColumn" width="129" minWidth="40" maxWidth="1000" id="frY-RX-8v8">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Name">
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1174,7 +1175,7 @@
                                                     <sortDescriptor key="sortDescriptorPrototype" selector="localizedCaseInsensitiveCompare:" sortKey="name"/>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
-                                                        <tableCellView id="ufM-v2-43s">
+                                                        <tableCellView identifier="FavoriteNameCell" id="ufM-v2-43s">
                                                             <rect key="frame" x="120" y="1" width="129" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
@@ -1194,7 +1195,7 @@
                                                         </tableCellView>
                                                     </prototypeCellViews>
                                                 </tableColumn>
-                                                <tableColumn width="117" minWidth="40" maxWidth="1000" id="Iup-BE-e7v">
+                                                <tableColumn identifier="FavoriteDateColumn" width="117" minWidth="40" maxWidth="1000" id="Iup-BE-e7v">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Date">
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1227,7 +1228,7 @@
                                                         </tableCellView>
                                                     </prototypeCellViews>
                                                 </tableColumn>
-                                                <tableColumn width="103" minWidth="40" maxWidth="1000" id="L1c-aj-TXc">
+                                                <tableColumn identifier="FavoriteActionColumn" width="103" minWidth="40" maxWidth="1000" id="L1c-aj-TXc">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Action">
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -1261,6 +1262,9 @@
                                                                 <constraint firstAttribute="bottom" secondItem="EJe-su-T03" secondAttribute="bottom" id="ITS-Yg-fWb"/>
                                                                 <constraint firstAttribute="trailing" secondItem="EJe-su-T03" secondAttribute="trailing" id="jbN-lh-NQy"/>
                                                             </constraints>
+                                                            <connections>
+                                                                <outlet property="removeButton" destination="EJe-su-T03" id="XI8-d8-1aN"/>
+                                                            </connections>
                                                         </tableCellView>
                                                     </prototypeCellViews>
                                                 </tableColumn>
