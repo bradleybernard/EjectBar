@@ -12,79 +12,91 @@ import Foundation
 class VolumesController: NSViewController {
     
     @IBOutlet weak var tableView: NSTableView!
-    private var volumes = [Volume]()
-    
-    private var plist = [String: Any]()
-    private var selected = Set<String>()
-    private var visible = true
-    
+
+    private var volumes = [Volume]() {
+        didSet {
+            DispatchQueue.main.async { [weak self] in
+                self?.tableView.reloadData()
+            }
+        }
+    }
+
+    private var favorites = Set<Favorite>() {
+        didSet {
+            DispatchQueue.main.async { [weak self] in
+                self?.tableView.reloadData()
+            }
+        }
+    }
+
+    private enum ColumnIdentifier: String {
+        case favorite = "VolumFavoriteColumn"
+        case name = "VolumeNameColumn"
+        case path = "VolumePathColumn"
+        case size = "VolumeSizeColumn"
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        tableView.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
-        tableView.autoresizingMask = .width
-        tableView.sizeToFit()
-        
+
         volumes = Volume.queryVolumes()
         VolumeListener.shared.registerCallbacks()
+
+        tableView.sortDescriptors = [
+//            NSSortDescriptor(keyPath: KeyPath<Volume, , ascending: <#T##Bool#>, comparator: <#T##Comparator##Comparator##(Any, Any) -> ComparisonResult#>)
+//            NSSortDescriptor(keyPath: \Volume.name, ascending: true),
+//            NSSortDescriptor(key: "name", ascending: true, selector: #selector(NSString.localizedCaseInsensitiveCompare(_:))),
+//            NSSortDescriptor(key: "path", ascending: true, selector: #selector(NSString.localizedCaseInsensitiveCompare(_:))),
+//            NSSortDescriptor(key: "size", ascending: true, selector: #selector(NSString.localizedCaseInsensitiveCompare(_:)))
+        ]
+        
+//        tableView.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: ColumnIdentifier.name.rawValue))?.sortDescriptorPrototype = NSSortDescriptor(keyPath: \Volume.size, ascending: true)
+
+//        tableView.sortD
         
         setupNotificationListeners()
         readSelected()
     }
     
-    func readSelected() {
-        guard let prefs = AppDelegate.loadSettings(), let saved = prefs["Selected"] as? [String] else {
-            return
-        }
-        
-        plist = prefs
-        selected = Set(saved)
-        
-        tableView.reloadData()
-    }
-    
-    func setupNotificationListeners() {
-        NotificationCenter.default.addObserver(forName: .diskMounted, object: nil, queue: nil, using: diskMounted)
-        NotificationCenter.default.addObserver(forName: .diskUnmounted, object: nil, queue: nil, using: diskUnmounted)
-        NotificationCenter.default.addObserver(forName: .ejectFavorites, object: nil, queue: nil, using: ejectFavorites)
-        NotificationCenter.default.addObserver(forName: .showApplication, object: nil, queue: nil, using: showApplication)
-        NotificationCenter.default.addObserver(forName: .hideApplication, object: nil, queue: nil, using: hideApplication)
-        NotificationCenter.default.addObserver(forName: .updateVolumeCount, object: nil, queue: nil, using: updateVolumeCount)
-        NotificationCenter.default.addObserver(forName: .resetTableView, object: nil, queue: nil, using: resetTableView)
-    }
-    
-    func resetTableView(notification: Notification) {
-        guard let dict = notification.userInfo, let background = dict["background"] as? Bool else {
-            return
-        }
-
-        let block = { [weak self] in
+    private func readSelected() {
+        AppDelegate.backgroundQueue.async { [weak self] in
             guard let self = self else {
                 return
             }
 
-            self.volumes = Volume.queryVolumes()
-            self.postVolumeCount()
-            self.tableView.reloadData()
-        }
-        
-        if background {
-            DispatchQueue.main.async {
-                block()
-            }
-        } else {
-            block()
+            self.favorites = AppDelegate.loadFavorites()
         }
     }
     
-    func updateVolumeCount(notification: Notification) {
+    private func setupNotificationListeners() {
+        NotificationCenter.default.addObserver(forName: .diskMounted, object: nil, queue: nil, using: diskMounted)
+        NotificationCenter.default.addObserver(forName: .diskUnmounted, object: nil, queue: nil, using: diskUnmounted)
+        NotificationCenter.default.addObserver(forName: .ejectFavorites, object: nil, queue: nil, using: ejectFavorites)
+        NotificationCenter.default.addObserver(forName: .updateVolumeCount, object: nil, queue: nil, using: updateVolumeCount)
+        NotificationCenter.default.addObserver(forName: .resetTableView, object: nil, queue: nil, using: resetTableView)
+    }
+    
+    private func resetTableView(notification: Notification) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            
+            self.volumes = Volume.queryVolumes()
+            self.postVolumeCount()
+        }
+    }
+    
+    private func updateVolumeCount(notification: Notification) {
         postVolumeCount()
     }
     
-    func ejectFavorites(notification: Notification) {
-        volumes.forEach { (volume) in
-            if selected.contains(volume.name) {
-                volume.unmount(callback: { (status, error) in
+    private func ejectFavorites(notification: Notification) {
+        let favoritesNames = favorites.map(\.id)
+
+        volumes.forEach { volume in
+            if favoritesNames.contains(volume.id) {
+                volume.unmount(callback: { status, error in
                     if let error = error {
                         DispatchQueue.main.async {
                             let alert = NSAlert()
@@ -99,15 +111,15 @@ class VolumesController: NSViewController {
         }
     }
     
-    func showApplication(notification: Notification) {
+    private func showApplication(notification: Notification) {
         view.window?.fadeIn()
     }
     
-    func hideApplication(notification: Notification) {
+    private func hideApplication(notification: Notification) {
         view.window?.fadeOut()
     }
     
-    func diskMounted(notification: Notification) {
+    private func diskMounted(notification: Notification) {
         guard let object = notification.object, let volume = object as? Volume, !volumeExists(volume: volume) else {
             return
         }
@@ -120,19 +132,18 @@ class VolumesController: NSViewController {
             }
 
             self.postVolumeCount()
-            self.tableView.reloadData()
         }
     }
     
-    func volumeExists(volume: Volume) -> Bool {
-        volumes.reduce(0) { $0 + ($1.id == volume.id ? 1 : 0) } == 1
+    private func volumeExists(volume: Volume) -> Bool {
+        volumes.first { $0.id == volume.id } != nil
     }
     
-    func postVolumeCount() {
+    private func postVolumeCount() {
         NotificationCenter.default.post(name: .postVolumeCount, object: nil, userInfo: ["count": volumes.count])
     }
     
-    func diskUnmounted(notification: Notification) {
+    private func diskUnmounted(notification: Notification) {
         guard let object = notification.object, let volume = object as? Volume else {
             return
         }
@@ -145,11 +156,10 @@ class VolumesController: NSViewController {
             }
 
             self.postVolumeCount()
-            self.tableView.reloadData()
         }
     }
     
-    @objc func checkboxSelected(sender: NSButton) {
+    @objc private func checkboxSelected(sender: NSButton) {
         sender.isEnabled = false
 
         defer {
@@ -160,17 +170,34 @@ class VolumesController: NSViewController {
         let volume = volumes[row]
         
         if sender.state == .on {
-            selected.insert(volume.name)
+            favorites.insert(Favorite(id: volume.id, name: volume.name, date: Date()))
         } else {
-            selected.remove(volume.name)
+            if let volumeFavorite = favorites.first(where: { volume.id == $0.id }) {
+                favorites.remove(volumeFavorite)
+            }
         }
-        
-        plist["Selected"] = Array(selected)
-        AppDelegate.writeSettings(plist)
+
+        AppDelegate.backgroundQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+
+            DispatchQueue.main.async {
+                if let appDelegate = NSApp.delegate as? AppDelegate {
+                    AppDelegate.backgroundQueue.async { [weak self] in
+                        guard let self = self else {
+                            return
+                        }
+                        
+                        appDelegate.saveFavorites(self.favorites)
+                    }
+                }
+            }
+        }
     }
     
-    func checkboxState(_ volume: Volume) -> NSCell.StateValue {
-        selected.contains(volume.name) ? .on : .off
+    private func checkboxState(_ volume: Volume) -> NSCell.StateValue {
+        return favorites.map(\.id).contains(volume.id) ? .on : .off
     }
 }
 
@@ -179,10 +206,10 @@ extension VolumesController: NSTableViewDelegate {
     private static let sizeFormatter = ByteCountFormatter()
     
     private enum CellIdentifier: String {
-        case pathCell = "PathCellID"
-        case nameCell = "NameCellID"
-        case selectedCell = "SelectedCellID"
-        case sizeCell = "SizeCellID"
+        case pathCell = "VolumePathCell"
+        case nameCell = "VolumeNameCell"
+        case favoriteCell = "VolumeFavoriteCell"
+        case sizeCell = "VolumeSizeCell"
     }
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
@@ -192,7 +219,7 @@ extension VolumesController: NSTableViewDelegate {
         let volume = volumes[row]
         
         if tableColumn == tableView.tableColumns[0] {
-            cellIdentifier = .selectedCell
+            cellIdentifier = .favoriteCell
         } else if tableColumn == tableView.tableColumns[1] {
             text = volume.name
             cellIdentifier = .nameCell
@@ -213,7 +240,7 @@ extension VolumesController: NSTableViewDelegate {
         }
 
         switch cellIdentifier {
-            case .selectedCell:
+            case .favoriteCell:
                 let selectedTableCell = tableCellView as? SelectedTableCell
                 selectedTableCell?.saveCheckbox.state = checkboxState(volume)
                 selectedTableCell?.saveCheckbox.action = #selector(VolumesController.checkboxSelected)
@@ -226,6 +253,11 @@ extension VolumesController: NSTableViewDelegate {
     
     func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
         false
+    }
+
+    func tableView(_ tableView: NSTableView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
+//        (volumes as NSArray).sortedArray(using: tableView.sortDescriptors)
+//        tableView.reloadData()
     }
 }
 

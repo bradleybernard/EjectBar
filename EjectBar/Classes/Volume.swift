@@ -30,46 +30,52 @@ enum VolumeReservedNames: String {
     case Volumes = "Volumes"
 }
 
-class CallbackWrapper<T, U> {
-    let callback : (T) -> U
-    init(callback: @escaping (T) -> U) {
+class CallbackWrapper<Input, Output> {
+    let callback : (Input) -> Output
+    init(callback: @escaping (Input) -> Output) {
         self.callback = callback
     }
 }
 
 class SessionWrapper {
-    static let session: DASession? = DASessionCreate(kCFAllocatorDefault)
+    static let shared: DASession? = DASessionCreate(kCFAllocatorDefault)
 }
 
-struct Volume {
+@objcMembers
+class Volume: NSObject {
+    let disk: DADisk
+
     let id: String
     let name: String
+    let model: String
     let device: String
-    let path: CFURL
-    let disk: DADisk
+    let `protocol`: String
+    let path: String
     let size: Int
     let ejectable: Bool
     let removable: Bool
 
-    private static let keys: [URLResourceKey] = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
-    private static let set: Set<URLResourceKey> = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
-
-    init(id: String, name: String, device: String, path: CFURL, disk: DADisk, size: Int, ejectable: Bool, removable: Bool) {
+    init(disk: DADisk, id: String, name: String, model: String, device: String, protocol: String, path: String, size: Int, ejectable: Bool, removable: Bool) {
+        self.disk = disk
         self.id = id
         self.name = name
+        self.model = model
         self.device = device
+        self.protocol = `protocol`
         self.path = path
-        self.disk = disk
         self.size = size
         self.ejectable = ejectable
         self.removable = removable
     }
 
+    private static let keys: [URLResourceKey] = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
+    private static let set: Set<URLResourceKey> = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
+
     func unmount(callback: @escaping UnmountCallback) {
         let wrapper = CallbackWrapper<UnmountDef, UnmountRet>(callback: callback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
 
-        DADiskUnmount(disk, DADiskUnmountOptions(kDADiskUnmountOptionWhole & kDADiskUnmountOptionForce), { (volume, dissenter, context) in
+        DADiskUnmount(disk, DADiskUnmountOptions(kDADiskUnmountOptionDefault), { (volume, dissenter, context) in
             guard let context = context else {
                 return
             }
@@ -115,48 +121,61 @@ struct Volume {
     }
 
     static func fromURL(_ url: URL) -> Volume? {
-        guard
-            let session = SessionWrapper.session,
-            let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, url as CFURL)
-        else { return nil }
+        guard let session = SessionWrapper.shared, let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, url as CFURL) else {
+            return nil
+        }
 
         return Volume.fromDisk(disk)
     }
     
     static func fromDisk(_ disk: DADisk) -> Volume? {
-        guard
-            let dict = DADiskCopyDescription(disk),
+        guard let dict = DADiskCopyDescription(disk),
             let diskInfo = dict as? [NSString: Any],
             let name = diskInfo[kDADiskDescriptionVolumeNameKey] as? String,
             let size = diskInfo[kDADiskDescriptionMediaSizeKey] as? Int,
             let ejectable = diskInfo[kDADiskDescriptionMediaEjectableKey] as? Bool,
             let removable = diskInfo[kDADiskDescriptionMediaRemovableKey] as? Bool,
-            let bsdName = DADiskGetBSDName(disk),
-            let pathVal = diskInfo[kDADiskDescriptionMediaPathKey],
-            let idVal = diskInfo[kDADiskDescriptionVolumeUUIDKey]
-        else { return nil }
-        
-        if name == VolumeReservedNames.EFI.rawValue {
+            let bsdName = diskInfo[kDADiskDescriptionMediaBSDNameKey] as? String,
+            let path = diskInfo[kDADiskDescriptionVolumePathKey] as? URL,
+            let idVal = diskInfo[kDADiskDescriptionVolumeUUIDKey],
+            let model = diskInfo[kDADiskDescriptionDeviceModelKey] as? String,
+            let `protocol` = diskInfo[kDADiskDescriptionDeviceProtocolKey] as? String
+        else {
+            return nil
+        }
+
+        guard name != VolumeReservedNames.EFI.rawValue else {
             return nil
         }
         
-        let volumeID = (idVal as! CFUUID)
-        let id = CFUUIDCreateString(kCFAllocatorDefault, volumeID) as String
-        let path = pathVal as! CFURL
-        let device = String(cString: bsdName)
+        let volumeID = idVal as! CFUUID
+
+        guard let cfID = CFUUIDCreateString(kCFAllocatorDefault, volumeID) else {
+            return nil
+        }
+
+        let id = cfID as String
         
-        return Volume(id: id, name: name, device: device, path: path, disk: disk, size: size, ejectable: ejectable, removable: removable)
+        return Volume(
+            disk: disk,
+            id: id,
+            name: name,
+            model: model,
+            device: bsdName,
+            protocol: `protocol`,
+            path: path.absoluteString,
+            size: size,
+            ejectable: ejectable,
+            removable: removable
+        )
     }
 
     static func isVolumeURL(_ url: URL) -> Bool {
-        return url.pathComponents.count > 1
-        && url.pathComponents[VolumeComponent.root.rawValue] == VolumeReservedNames.Volumes.rawValue
+        url.pathComponents.count > 1 && url.pathComponents[VolumeComponent.root.rawValue] == VolumeReservedNames.Volumes.rawValue
     }
 
     static func queryVolumes() -> [Volume] {
-        let paths = FileManager().mountedVolumeURLs(includingResourceValuesForKeys: keys, options: [])
-
-        guard let urls = paths else {
+        guard let urls = FileManager().mountedVolumeURLs(includingResourceValuesForKeys: keys, options: []) else {
             return []
         }
 
@@ -183,16 +202,19 @@ class VolumeListener {
         }
         listeners.removeAll()
         
-        guard let session = SessionWrapper.session else { return }
+        guard let session = SessionWrapper.shared else {
+            return
+        }
+        
         DASessionSetDispatchQueue(session, nil)
     }
     
     func registerCallbacks() {
-        guard
-            let session = SessionWrapper.session
-            else { return }
+        guard let session = SessionWrapper.shared else {
+            return
+        }
         
-        DASessionSetDispatchQueue(session, DispatchQueue.global())
+        DASessionSetDispatchQueue(session, DispatchQueue.main)
         
         mountApproval(session)
         unmountApproval(session)
@@ -217,8 +239,7 @@ class VolumeListener {
     }
     
     func changedCallback(disk: DADisk, keys: CFArray) {
-        let center = NotificationCenter.default
-        center.post(name: Notification.Name(rawValue: "resetTableView"), object: nil, userInfo: ["background": true])
+        NotificationCenter.default.post(name: .resetTableView, object: nil, userInfo: nil)
     }
     
     func mountApproval(_ session: DASession) {
@@ -239,9 +260,7 @@ class VolumeListener {
     }
     
     func mountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
-        let center = NotificationCenter.default
-        center.post(name: Notification.Name(rawValue: "diskMounted"), object: Volume.fromDisk(disk), userInfo: nil)
-        
+        NotificationCenter.default.post(name: .diskMounted, object: Volume.fromDisk(disk), userInfo: nil)
         return nil
     }
     
@@ -263,9 +282,7 @@ class VolumeListener {
     }
     
     func unmountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
-        let center = NotificationCenter.default
-        center.post(name: Notification.Name(rawValue: "diskUnmounted"), object: Volume.fromDisk(disk), userInfo: nil)
-        
+        NotificationCenter.default.post(name: .diskUnmounted, object: Volume.fromDisk(disk), userInfo: nil)
         return nil
     }
 }

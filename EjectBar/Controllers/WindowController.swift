@@ -8,15 +8,13 @@
 
 import Cocoa
 
-class WindowController: NSWindowController {
+class VolumesWindowController: NSWindowController {
 
     override func windowDidLoad() {
         super.windowDidLoad()
-        
-        window?.title = "Mounted Volumes"
     }
     
-    func titleBarButton(title: String) -> NSTitlebarAccessoryViewController {
+    private func titleBarButton(title: String) -> NSTitlebarAccessoryViewController {
         let textField = NSTextField()
         textField.isEditable = false
         textField.isSelectable = false
@@ -28,29 +26,36 @@ class WindowController: NSWindowController {
         return accessory
     }
     
-    @IBAction func ejectAtion(_ sender: Any) {
-        let center = NotificationCenter.default
-        center.post(name: Notification.Name(rawValue: "ejectFavorites"), object: nil, userInfo: nil)
+    @IBAction private func ejectAtion(_ sender: Any) {
+        NotificationCenter.default.post(name: .ejectFavorites, object: nil, userInfo: nil)
     }
     
-    @IBAction func hideAction(_ sender: Any) {
-        window?.orderOut(self)
+    @IBAction private func hideAction(_ sender: Any) {
+        window?.fadeOut()
     }
     
-    @IBAction func quitAction(_ sender: Any) {
-        NSApplication.shared.terminate(self)
+    @IBAction private func quitAction(_ sender: Any) {
+        window?.fadeOut() { [weak self] in
+            NSApplication.shared.terminate(self)
+        }
     }
     
-    @IBAction func aboutAction(_ sender: Any) {
-        let alert = NSAlert()
-        alert.addButton(withTitle: "OK")
-        alert.messageText = "About EjectBar"
-        alert.informativeText = "Copyright © 2017 Bradley Bernard. All rights reserved. https://bradleybernard.com/"
-        alert.runModal()
+    @IBAction private func favoritesAction(_ sender: Any) {
+//        let alert = NSAlert()
+//
+//        alert.addButton(withTitle: "OK")
+//        alert.messageText = "About EjectBar"
+//        alert.informativeText = "Copyright © 2020 Bradley Bernard. All rights reserved. https://bradleybernard.com/"
+//        alert.runModal()
+        let favoritesViewControllerIdentifier = NSStoryboard.SceneIdentifier("FavoritesViewController")
+        guard let favoritesViewController = NSStoryboard(name: "Main", bundle: .main).instantiateController(withIdentifier: favoritesViewControllerIdentifier) as? FavoritesViewController else {
+            return
+        }
+
+        self.window?.contentViewController = favoritesViewController
     }
     
-    @IBAction func refreshAction(_ sender: Any) {
-         let center = NotificationCenter.default
-         center.post(name: Notification.Name(rawValue: "resetTableView"), object: nil, userInfo: ["background": false])
+    @IBAction private func refreshAction(_ sender: Any) {
+        NotificationCenter.default.post(name: .resetTableView, object: nil, userInfo: ["background": false])
     }
 }

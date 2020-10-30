@@ -10,139 +10,148 @@ import Cocoa
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
-    
-    private static let settingsFile: String = "Settings"
-    private static let folderName: String = "EjectBar"
-    private static let settingsFolder: String = "Settings"
-    
-    private var plist = [String: Any]()
+
+    private enum Path: String {
+        case settings = "Settings"
+        case app = "EjectBar"
+        case fileEnding = "."
+        case plist = "plist"
+    }
+
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let menu = NSMenu()
-    
+
+    static let backgroundQueue = DispatchQueue(label: "Background")
+    var favorites = Set<Favorite>()
+
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        Self.backgroundQueue.async { [weak self] in
+            self?.favorites = Self.loadFavorites()
+        }
+
         setupMenu()
         setupNotificationListeners()
     }
     
-    func setupNotificationListeners() {
-        let center = NotificationCenter.default
-        center.addObserver(forName: Notification.Name(rawValue: "postVolumeCount"), object: nil, queue: nil, using: postVolumeCount)
-        center.post(name: Notification.Name(rawValue: "updateVolumeCount"), object: nil, userInfo: nil)
+    private func setupNotificationListeners() {
+        NotificationCenter.default.addObserver(forName: .postVolumeCount, object: nil, queue: nil, using: postVolumeCount)
+        NotificationCenter.default.post(name: .updateVolumeCount, object: nil, userInfo: nil)
     }
     
-    func postVolumeCount(notification: Notification) {
-        guard
-            let info = notification.userInfo,
-            let count = info["count"] as? Int
-        else { return }
+    private func postVolumeCount(notification: Notification) {
+        guard let info = notification.userInfo, let count = info["count"] as? Int else {
+            return
+        }
         
         DispatchQueue.main.async { [weak self] in
             self?.statusItem.title = String(count)
         }
     }
-
-    static func loadSettings() -> [String: Any]? {
-        guard
-            let path = createSettings(),
-            let data = NSData(contentsOfFile: path.path)
-        else { return nil }
-        
-        return try? PropertyListSerialization.propertyList(from: data as Data, options: [], format: nil) as? [String: Any]
-    }
     
-    static func createSettings() -> URL? {
-        guard
-            let source = Bundle.main.path(forResource: AppDelegate.settingsFile, ofType: "plist"),
-            let url = try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-        else {
+    private static var settingsURL: URL? {
+        guard let source = Bundle.main.path(forResource: Path.settings.rawValue, ofType: Path.plist.rawValue),
+              let url = try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false) else {
             return nil
         }
         
-        var dest = url
-        dest.appendPathComponent(AppDelegate.folderName, isDirectory: true)
-        dest.appendPathComponent(AppDelegate.settingsFolder, isDirectory: true)
-        try? FileManager.default.createDirectory(at: dest, withIntermediateDirectories: true, attributes: nil)
+        var settingsURL = url
+        settingsURL.appendPathComponent(Path.app.rawValue, isDirectory: true)
+        settingsURL.appendPathComponent(Path.settings.rawValue, isDirectory: true)
+        try? FileManager.default.createDirectory(at: settingsURL, withIntermediateDirectories: true, attributes: nil)
         
-        let name = AppDelegate.settingsFile + ".plist"
-        dest.appendPathComponent(name, isDirectory: false)
-        try? FileManager.default.copyItem(atPath: source, toPath: dest.path)
+        let name = Path.settings.rawValue + Path.fileEnding.rawValue + Path.plist.rawValue
+        settingsURL.appendPathComponent(name, isDirectory: false)
+        try? FileManager.default.copyItem(atPath: source, toPath: settingsURL.path)
         
-        return dest
+        return settingsURL
+    }
+
+    static func loadFavorites() -> Set<Favorite> {
+        guard let settingsURL = settingsURL, let data = try? Data(contentsOf: settingsURL) else {
+            return .init()
+        }
+
+        let value: Set<Favorite> = {
+            do {
+                return try PropertyListDecoder().decode(Set<Favorite>.self, from: data)
+            } catch {
+                return .init()
+            }
+        }()
+
+        return value
     }
     
-    static func writeSettings(_ prefs: [String: Any]) {
-        guard let path = AppDelegate.plistURL() else { return }
-        
-        (prefs as NSDictionary).write(to: path, atomically: true)
+    func saveFavorites(_ favorites: Set<Favorite>) {
+        guard let settingsURL = AppDelegate.settingsURL else {
+            return
+        }
+
+        let encoder = PropertyListEncoder()
+        encoder.outputFormat = .xml
+
+        let data = try? encoder.encode(favorites)
+        try? data?.write(to: settingsURL)
+
+        self.favorites = favorites
+        NotificationCenter.default.post(name: .favoritesUpdated, object: nil, userInfo: ["favorites": favorites])
     }
     
-    static func plistURL() -> URL? {
-        guard let url = try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false) else { return nil }
+    static var plistURL: URL? {
+        guard let url = try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false) else {
+            return nil
+        }
         
-        var dest = url
-        dest.appendPathComponent(AppDelegate.folderName, isDirectory: true)
-        dest.appendPathComponent(AppDelegate.settingsFolder, isDirectory: true)
-        dest.appendPathComponent(AppDelegate.settingsFile + ".plist", isDirectory: false)
+        var plistURL = url
+        plistURL.appendPathComponent(Path.app.rawValue, isDirectory: true)
+        plistURL.appendPathComponent(Path.settings.rawValue, isDirectory: true)
+        plistURL.appendPathComponent(Path.settings.rawValue + Path.fileEnding.rawValue + Path.plist.rawValue, isDirectory: false)
         
-        return dest
+        return plistURL
     }
     
-    func setupMenu() {
-        guard let button = statusItem.button else { return }
-        
-        menu.addItem(NSMenuItem(title: "Eject Favorites", action: #selector(AppDelegate.ejectAction(sender:)), keyEquivalent: "e"))
+    private func setupMenu() {
+        guard let button = statusItem.button else {
+            return
+        }
+
+        button.image = NSImage(named: "EjectIcon")
+
+        menu.addItem(NSMenuItem(title: "Eject Favorites", action: #selector(AppDelegate.ejectFavorites(sender:)), keyEquivalent: "e"))
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Show Window", action: #selector(AppDelegate.showAction(sender:)), keyEquivalent: "s"))
-        menu.addItem(NSMenuItem(title: "Hide Window", action: #selector(AppDelegate.hideAction(sender:)), keyEquivalent: "h"))
+        menu.addItem(NSMenuItem(title: "Show Volumes Window", action: #selector(AppDelegate.showVolumesWindow(sender:)), keyEquivalent: "r"))
+        menu.addItem(NSMenuItem(title: "Hide Volumes Window", action: #selector(AppDelegate.hideVolumesWindow(sender:)), keyEquivalent: "t"))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "Show Favorites Window", action: #selector(AppDelegate.showFavoritesWindow(sender:)), keyEquivalent: "f"))
+        menu.addItem(NSMenuItem(title: "Hide Favorites Window", action: #selector(AppDelegate.hideFavoritesWindow(sender:)), keyEquivalent: "g"))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(AppDelegate.quitAction(sender:)), keyEquivalent: "q"))
+        
         statusItem.menu = menu
-        
-        button.image = NSImage(named: "EjectIcon")
-        button.target = self
-        button.action = #selector(self.statusBarButtonClicked(sender:))
-        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
     }
     
-    @objc func statusBarButtonClicked(sender: NSStatusBarButton) {
-        let event = NSApp.currentEvent
-        
-        if event?.type == .rightMouseUp {
-            //
-        } else {
-            //
-        }
-    }
-    
-    @objc func quitAction(sender: Any) {
+    @objc private func quitAction(sender: Any) {
         NSApplication.shared.terminate(self)
     }
-    
-    @objc func hideAction(sender: Any) {
-        let center = NotificationCenter.default
-        center.post(name: Notification.Name(rawValue: "hideApplication"), object: nil, userInfo: nil)
-    }
-    
-    @objc func showAction(sender: Any) {
-        let center = NotificationCenter.default
-        center.post(name: Notification.Name(rawValue: "showApplication"), object: nil, userInfo: nil)
-    }
-    
-    @objc func ejectAction(sender: Any) {
-        let center = NotificationCenter.default
-        center.post(name: Notification.Name(rawValue: "ejectFavorites"), object: nil, userInfo: nil)
-    }
-    
-    func menuClick(sender: NSStatusBarButton) {
-        guard let event = NSApp.currentEvent else { return }
 
-        let center = NotificationCenter.default
-        
-        if event.type == .rightMouseUp {
-            center.post(name: Notification.Name(rawValue: "rightClick"), object: nil, userInfo: nil)
-        } else if event.type == .leftMouseUp {
-            center.post(name: Notification.Name(rawValue: "leftClick"), object: nil, userInfo: nil)
-        }
+    @objc private func showVolumesWindow(sender: Any) {
+        NotificationCenter.default.post(name: .showVolumesWindow, object: nil, userInfo: nil)
+    }
+    
+    @objc private func hideVolumesWindow(sender: Any) {
+        NotificationCenter.default.post(name: .hideVolumesWindow, object: nil, userInfo: nil)
+    }
+
+    @objc private func showFavoritesWindow(sender: Any) {
+        NotificationCenter.default.post(name: .showFavoritesWindow, object: nil, userInfo: nil)
+    }
+
+    @objc private func hideFavoritesWindow(sender: Any) {
+        NotificationCenter.default.post(name: .hideFavoritesWindow, object: nil, userInfo: nil)
+    }
+    
+    @objc private func ejectFavorites(sender: Any) {
+        NotificationCenter.default.post(name: .ejectFavorites, object: nil, userInfo: nil)
     }
 }
 

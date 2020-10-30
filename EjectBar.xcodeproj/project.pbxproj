@@ -9,25 +9,37 @@
 /* Begin PBXBuildFile section */
 		111A508C1F285C270077FE90 /* SelectedTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111A508B1F285C270077FE90 /* SelectedTableCell.swift */; };
 		111A50901F2865FF0077FE90 /* Settings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 111A508F1F2865FF0077FE90 /* Settings.plist */; };
+		1181FD49254A778E00E089B1 /* Notification.Name+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1181FD48254A778E00E089B1 /* Notification.Name+.swift */; };
+		1181FD4E254A819000E089B1 /* NSWindow+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1181FD4D254A819000E089B1 /* NSWindow+.swift */; };
+		118942B4254A8F6F0009EBA0 /* Favorite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 118942B3254A8F6F0009EBA0 /* Favorite.swift */; };
+		118942B7254B80430009EBA0 /* NSTableView+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 118942B6254B80430009EBA0 /* NSTableView+.swift */; };
+		11C4AB39254A85F600C2A9DF /* FavoritesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11C4AB38254A85F600C2A9DF /* FavoritesViewController.swift */; };
+		11C4AB3E254A8BC600C2A9DF /* FavoritesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11C4AB3D254A8BC600C2A9DF /* FavoritesWindowController.swift */; };
 		11EFD8461F25D43700A225DD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EFD8451F25D43700A225DD /* AppDelegate.swift */; };
 		11EFD84A1F25D43700A225DD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 11EFD8491F25D43700A225DD /* Assets.xcassets */; };
 		11EFD84D1F25D43700A225DD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 11EFD84B1F25D43700A225DD /* Main.storyboard */; };
-		11EFD8551F25D5CD00A225DD /* HomeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EFD8541F25D5CD00A225DD /* HomeController.swift */; };
-		11EFD8571F25D69000A225DD /* WindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EFD8561F25D69000A225DD /* WindowController.swift */; };
+		11EFD8551F25D5CD00A225DD /* VolumesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EFD8541F25D5CD00A225DD /* VolumesController.swift */; };
+		11EFD8571F25D69000A225DD /* VolumesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EFD8561F25D69000A225DD /* VolumesWindowController.swift */; };
 		11EFD8591F25D84000A225DD /* Volume.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EFD8581F25D84000A225DD /* Volume.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		111A508B1F285C270077FE90 /* SelectedTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedTableCell.swift; sourceTree = "<group>"; };
 		111A508F1F2865FF0077FE90 /* Settings.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Settings.plist; sourceTree = "<group>"; };
+		1181FD48254A778E00E089B1 /* Notification.Name+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification.Name+.swift"; sourceTree = "<group>"; };
+		1181FD4D254A819000E089B1 /* NSWindow+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSWindow+.swift"; sourceTree = "<group>"; };
+		118942B3254A8F6F0009EBA0 /* Favorite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Favorite.swift; sourceTree = "<group>"; };
+		118942B6254B80430009EBA0 /* NSTableView+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSTableView+.swift"; sourceTree = "<group>"; };
+		11C4AB38254A85F600C2A9DF /* FavoritesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesViewController.swift; sourceTree = "<group>"; };
+		11C4AB3D254A8BC600C2A9DF /* FavoritesWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesWindowController.swift; sourceTree = "<group>"; };
 		11DD8FE51F2957B600747F4C /* EjectBar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EjectBar.entitlements; sourceTree = "<group>"; };
 		11EFD8421F25D43700A225DD /* EjectBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EjectBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		11EFD8451F25D43700A225DD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		11EFD8491F25D43700A225DD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		11EFD84C1F25D43700A225DD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		11EFD84E1F25D43700A225DD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		11EFD8541F25D5CD00A225DD /* HomeController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeController.swift; sourceTree = "<group>"; };
-		11EFD8561F25D69000A225DD /* WindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WindowController.swift; sourceTree = "<group>"; };
+		11EFD8541F25D5CD00A225DD /* VolumesController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VolumesController.swift; sourceTree = "<group>"; };
+		11EFD8561F25D69000A225DD /* VolumesWindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VolumesWindowController.swift; sourceTree = "<group>"; };
 		11EFD8581F25D84000A225DD /* Volume.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Volume.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -53,8 +65,10 @@
 		111A50921F2903160077FE90 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				11EFD8561F25D69000A225DD /* WindowController.swift */,
-				11EFD8541F25D5CD00A225DD /* HomeController.swift */,
+				11EFD8561F25D69000A225DD /* VolumesWindowController.swift */,
+				11EFD8541F25D5CD00A225DD /* VolumesController.swift */,
+				11C4AB38254A85F600C2A9DF /* FavoritesViewController.swift */,
+				11C4AB3D254A8BC600C2A9DF /* FavoritesWindowController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -63,6 +77,7 @@
 			isa = PBXGroup;
 			children = (
 				11EFD8581F25D84000A225DD /* Volume.swift */,
+				118942B3254A8F6F0009EBA0 /* Favorite.swift */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -73,6 +88,16 @@
 				111A508B1F285C270077FE90 /* SelectedTableCell.swift */,
 			);
 			path = Cells;
+			sourceTree = "<group>";
+		};
+		1181FD4C254A818400E089B1 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				1181FD48254A778E00E089B1 /* Notification.Name+.swift */,
+				1181FD4D254A819000E089B1 /* NSWindow+.swift */,
+				118942B6254B80430009EBA0 /* NSTableView+.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		11EFD8391F25D43600A225DD = {
@@ -94,15 +119,16 @@
 		11EFD8441F25D43700A225DD /* EjectBar */ = {
 			isa = PBXGroup;
 			children = (
-				11DD8FE51F2957B600747F4C /* EjectBar.entitlements */,
+				11EFD8451F25D43700A225DD /* AppDelegate.swift */,
+				11EFD8491F25D43700A225DD /* Assets.xcassets */,
 				111A50941F29033B0077FE90 /* Cells */,
 				111A50931F29032D0077FE90 /* Classes */,
 				111A50921F2903160077FE90 /* Controllers */,
-				111A50911F2903020077FE90 /* Supporting Files */,
-				11EFD8451F25D43700A225DD /* AppDelegate.swift */,
-				11EFD8491F25D43700A225DD /* Assets.xcassets */,
+				11DD8FE51F2957B600747F4C /* EjectBar.entitlements */,
+				1181FD4C254A818400E089B1 /* Extensions */,
 				11EFD84E1F25D43700A225DD /* Info.plist */,
 				11EFD84B1F25D43700A225DD /* Main.storyboard */,
+				111A50911F2903020077FE90 /* Supporting Files */,
 			);
 			path = EjectBar;
 			sourceTree = "<group>";
@@ -186,9 +212,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				11EFD8461F25D43700A225DD /* AppDelegate.swift in Sources */,
+				1181FD4E254A819000E089B1 /* NSWindow+.swift in Sources */,
+				11C4AB39254A85F600C2A9DF /* FavoritesViewController.swift in Sources */,
+				118942B7254B80430009EBA0 /* NSTableView+.swift in Sources */,
 				111A508C1F285C270077FE90 /* SelectedTableCell.swift in Sources */,
-				11EFD8571F25D69000A225DD /* WindowController.swift in Sources */,
-				11EFD8551F25D5CD00A225DD /* HomeController.swift in Sources */,
+				11C4AB3E254A8BC600C2A9DF /* FavoritesWindowController.swift in Sources */,
+				118942B4254A8F6F0009EBA0 /* Favorite.swift in Sources */,
+				11EFD8571F25D69000A225DD /* VolumesWindowController.swift in Sources */,
+				11EFD8551F25D5CD00A225DD /* VolumesController.swift in Sources */,
+				1181FD49254A778E00E089B1 /* Notification.Name+.swift in Sources */,
 				11EFD8591F25D84000A225DD /* Volume.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
