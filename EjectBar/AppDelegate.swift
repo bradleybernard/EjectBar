@@ -35,7 +35,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func setupNotificationListeners() {
         NotificationCenter.default.addObserver(forName: .postVolumeCount, object: nil, queue: nil, using: postVolumeCount)
-        NotificationCenter.default.post(name: .updateVolumeCount, object: nil, userInfo: nil)
     }
     
     private func postVolumeCount(notification: Notification) {
@@ -44,7 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         DispatchQueue.main.async { [weak self] in
-            self?.statusItem.title = String(count)
+            self?.statusItem.button?.title = String(count)
         }
     }
 
@@ -97,26 +96,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NotificationCenter.default.post(name: .favoritesUpdated, object: nil, userInfo: ["favorites": favorites])
     }
     
-    static var plistURL: URL? {
-        guard let url = try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false) else {
-            return nil
-        }
-        
-        var plistURL = url
-        plistURL.appendPathComponent(Path.app.rawValue, isDirectory: true)
-        plistURL.appendPathComponent(Path.settings.rawValue, isDirectory: true)
-        plistURL.appendPathComponent(Path.settings.rawValue + Path.fileEnding.rawValue + Path.plist.rawValue, isDirectory: false)
-        
-        return plistURL
-    }
-    
     private func setupMenu() {
-        guard let button = statusItem.button else {
-            return
-        }
-
-        button.image = NSImage(named: "EjectIcon")
-
         menu.addItem(NSMenuItem(title: "Eject Favorites", action: #selector(AppDelegate.ejectFavorites(sender:)), keyEquivalent: "e"))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Show Volumes Window", action: #selector(AppDelegate.showVolumesWindow(sender:)), keyEquivalent: "r"))
@@ -126,8 +106,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem(title: "Hide Favorites Window", action: #selector(AppDelegate.hideFavoritesWindow(sender:)), keyEquivalent: "g"))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(AppDelegate.quitAction(sender:)), keyEquivalent: "q"))
-        
+
         statusItem.menu = menu
+        statusItem.button?.image = NSImage(named: "EjectIcon")
+        statusItem.button?.imagePosition = .imageLeft
+        statusItem.button?.title = "0"
     }
     
     @objc private func quitAction(sender: Any) {

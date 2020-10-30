@@ -14,8 +14,12 @@ extension NSTableView {
         guard numberOfRows > 0 else {
             return
         }
-        
-        let padding: CGFloat = 20
+
+        // Smaller to allow for spacing between the column values
+        let valuePadding: CGFloat = 20
+
+        // Larger to accomodate sorting by column (adds more width from chevron)
+        let headerPadding: CGFloat = 40
 
         tableColumns.enumerated().forEach { column, tableColumn in
             var columnWidth: CGFloat = 0
@@ -25,8 +29,10 @@ extension NSTableView {
                 let cellView = view(atColumn: column, row: row, makeIfNecessary: true) as? NSTableCellView
                 let width: CGFloat
 
-                if let selectedCell = cellView as? SelectedTableCell {
-                    width = selectedCell.frame.width
+                if let favoriteToggleCell = cellView as? FavoriteToggleCellView {
+                    width = favoriteToggleCell.frame.width
+                } else if let removeFavoriteCell = cellView as? RemoveFavoriteTableCellView {
+                    width = removeFavoriteCell.frame.width
                 } else {
                     width = cellView?.textField?.attributedStringValue.size().width ?? 0
                 }
@@ -34,7 +40,8 @@ extension NSTableView {
                 columnWidth = max(width, columnWidth)
             }
 
-            tableColumn.width = max(columnWidth, headerWidth) + padding
+            // Choose either column (value) width or header width, then add padding depending on if it is a header or value
+            tableColumn.width = max(columnWidth, headerWidth) + (columnWidth > headerWidth ? valuePadding : headerPadding)
         }
 
         reloadData()

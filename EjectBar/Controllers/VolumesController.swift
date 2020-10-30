@@ -1,5 +1,5 @@
 //
-//  HomeController.swift
+//  VolumesController.swift
 //  EjectBar
 //
 //  Created by Bradley Bernard on 7/24/17.
@@ -22,6 +22,7 @@ class VolumesController: NSViewController {
 
                 self.tableView.reloadData()
                 self.tableView.resizeColumns()
+                self.view.window?.resizeToFitTableView(tableView: self.tableView)
                 self.postVolumeCount()
             }
         }
@@ -36,6 +37,7 @@ class VolumesController: NSViewController {
 
                 self.tableView.reloadData()
                 self.tableView.resizeColumns()
+                self.view.window?.resizeToFitTableView(tableView: self.tableView)
                 self.postVolumeCount()
             }
         }
@@ -48,10 +50,10 @@ class VolumesController: NSViewController {
         VolumeListener.shared.registerCallbacks()
 
         setupNotificationListeners()
-        readSelected()
+        readFavorites()
     }
     
-    private func readSelected() {
+    private func readFavorites() {
         AppDelegate.backgroundQueue.async { [weak self] in
             guard let self = self else {
                 return
@@ -65,7 +67,6 @@ class VolumesController: NSViewController {
         NotificationCenter.default.addObserver(forName: .diskMounted, object: nil, queue: nil, using: diskMounted)
         NotificationCenter.default.addObserver(forName: .diskUnmounted, object: nil, queue: nil, using: diskUnmounted)
         NotificationCenter.default.addObserver(forName: .ejectFavorites, object: nil, queue: nil, using: ejectFavorites)
-        NotificationCenter.default.addObserver(forName: .updateVolumeCount, object: nil, queue: nil, using: updateVolumeCount)
         NotificationCenter.default.addObserver(forName: .resetTableView, object: nil, queue: nil, using: resetTableView)
         NotificationCenter.default.addObserver(forName: .favoritesUpdated, object: nil, queue: nil, using: favoritesUpdated)
     }
@@ -78,10 +79,6 @@ class VolumesController: NSViewController {
             
             self.volumes = Volume.queryVolumes()
         }
-    }
-    
-    private func updateVolumeCount(notification: Notification) {
-        postVolumeCount()
     }
 
     private func favoritesUpdated(notification: Notification) {
@@ -151,42 +148,12 @@ class VolumesController: NSViewController {
         volumes = volumes.filter { $0.id != volume.id }
     }
     
-    @objc private func checkboxSelected(sender: NSButton) {
-        sender.isEnabled = false
-
-        defer {
-            sender.isEnabled = true
-        }
-
-        let row = tableView.row(for: sender)
-        let volume = volumes[row]
-        
-        if sender.state == .on {
-            favorites.insert(Favorite(id: volume.id, name: volume.name, date: Date()))
-        } else {
-            if let volumeFavorite = favorites.first(where: { volume.id == $0.id }) {
-                favorites.remove(volumeFavorite)
-            }
-        }
-
-        DispatchQueue.main.async {
-            if let appDelegate = NSApp.delegate as? AppDelegate {
-                AppDelegate.backgroundQueue.async { [weak self] in
-                    guard let self = self else {
-                        return
-                    }
-
-                    appDelegate.saveFavorites(self.favorites)
-                }
-            }
-        }
-
-    }
-    
     private func checkboxState(_ volume: Volume) -> NSCell.StateValue {
         return favorites.map(\.id).contains(volume.id) ? .on : .off
     }
 }
+
+// MARK: - NSTableViewDelegate
 
 extension VolumesController: NSTableViewDelegate {
 
@@ -272,9 +239,9 @@ extension VolumesController: NSTableViewDelegate {
 
         switch cellType {
             case .favorite:
-                let selectedTableCell = tableCellView as? SelectedTableCell
-                selectedTableCell?.saveCheckbox.state = checkboxState(volume)
-                selectedTableCell?.saveCheckbox.action = #selector(VolumesController.checkboxSelected)
+                let favoriteToggleCell = tableCellView as? FavoriteToggleCellView
+                favoriteToggleCell?.checkbox.state = checkboxState(volume)
+                favoriteToggleCell?.delegate = self
             default:
                 tableCellView.textField?.stringValue = text
         }
@@ -292,9 +259,10 @@ extension VolumesController: NSTableViewDelegate {
         }
 
         volumes = volumesSorted
-        tableView.reloadData()
     }
 }
+
+// MARK: - NSTableViewDataSource
 
 extension VolumesController: NSTableViewDataSource {
 
@@ -302,4 +270,42 @@ extension VolumesController: NSTableViewDataSource {
         volumes.count
     }
     
+}
+
+// MARK: - FavoriteToggleCellDelegate
+
+extension VolumesController: FavoriteToggleCellDelegate {
+
+    func favoriteToggleCellTapped(_ favoriteToggleCell: FavoriteToggleCellView) {
+        guard let checkbox = favoriteToggleCell.checkbox else {
+            return
+        }
+
+        checkbox.isEnabled = false
+
+        let row = tableView.row(for: favoriteToggleCell)
+        let volume = volumes[row]
+
+        if checkbox.state == .on {
+            favorites.insert(Favorite(id: volume.id, name: volume.name, date: Date()))
+        } else {
+            if let volumeFavorite = favorites.first(where: { volume.id == $0.id }) {
+                favorites.remove(volumeFavorite)
+            }
+        }
+
+        DispatchQueue.main.async {
+            if let appDelegate = NSApp.delegate as? AppDelegate {
+                AppDelegate.backgroundQueue.async { [weak self] in
+                    guard let self = self else {
+                        return
+                    }
+
+                    appDelegate.saveFavorites(self.favorites)
+                    checkbox.isEnabled = true
+                }
+            }
+        }
+    }
+
 }

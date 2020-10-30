@@ -790,6 +790,7 @@
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            <tableViewGridLines key="gridStyleMask" vertical="YES" horizontal="YES"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
                                                 <tableColumn identifier="VolumeFavoriteColumn" width="100" minWidth="40" maxWidth="100" id="iuH-9v-cIm">
@@ -804,7 +805,7 @@
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
-                                                        <tableCellView identifier="VolumeFavoriteCell" id="0w0-VC-GK8" customClass="SelectedTableCell" customModule="EjectBar" customModuleProvider="target">
+                                                        <tableCellView identifier="VolumeFavoriteCell" id="0w0-VC-GK8" customClass="FavoriteToggleCellView" customModule="EjectBar" customModuleProvider="target">
                                                             <rect key="frame" x="1" y="1" width="100" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
@@ -813,6 +814,9 @@
                                                                     <buttonCell key="cell" type="check" title="Favorite" bezelStyle="regularSquare" imagePosition="left" inset="2" id="FwJ-fa-dIM">
                                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                                         <font key="font" metaFont="system"/>
+                                                                        <connections>
+                                                                            <action selector="checkboxAction:" target="0w0-VC-GK8" id="C6C-cg-0to"/>
+                                                                        </connections>
                                                                     </buttonCell>
                                                                 </button>
                                                             </subviews>
@@ -822,7 +826,7 @@
                                                                 <constraint firstAttribute="trailing" secondItem="IFZ-M1-q27" secondAttribute="trailing" id="Nll-0I-hOU"/>
                                                             </constraints>
                                                             <connections>
-                                                                <outlet property="saveCheckbox" destination="FwJ-fa-dIM" id="HHO-M4-BWY"/>
+                                                                <outlet property="checkbox" destination="FwJ-fa-dIM" id="HHO-M4-BWY"/>
                                                             </connections>
                                                         </tableCellView>
                                                     </prototypeCellViews>
@@ -1081,7 +1085,7 @@
         <scene sceneID="VjN-hJ-Fk1">
             <objects>
                 <windowController storyboardIdentifier="FavoritesWindowController" showSeguePresentationStyle="single" id="eZp-Ki-4IP" customClass="FavoritesWindowController" customModule="EjectBar" customModuleProvider="target" sceneMemberID="viewController">
-                    <window key="window" title="Favorites" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="pkm-jW-Mi2">
+                    <window key="window" title="Favorite Volumes" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="pkm-jW-Mi2">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="260" y="330" width="469" height="270"/>
@@ -1116,7 +1120,7 @@
                                     <rect key="frame" x="1" y="0.0" width="477" height="299"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="FST-wY-4oM" viewBased="YES" id="2SG-Ha-Bnd">
+                                        <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="FST-wY-4oM" viewBased="YES" id="2SG-Ha-Bnd">
                                             <rect key="frame" x="0.0" y="0.0" width="477" height="274"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
@@ -1144,7 +1148,7 @@
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FJ7-sz-7F8">
                                                                     <rect key="frame" x="0.0" y="1" width="116" height="16"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
-                                                                    <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="x17-L2-2kl">
+                                                                    <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" alignment="center" title="Table View Cell" id="x17-L2-2kl">
                                                                         <font key="font" usesAppearanceFont="YES"/>
                                                                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1235,23 +1239,28 @@
                                                     </textFieldCell>
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
-                                                        <tableCellView identifier="FavoriteActionCell" id="W0L-G9-PNL">
+                                                        <tableCellView identifier="FavoriteActionCell" misplaced="YES" id="W0L-G9-PNL" customClass="RemoveFavoriteTableCellView" customModule="EjectBar" customModuleProvider="target">
                                                             <rect key="frame" x="372" y="1" width="103" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="B5i-JA-3ZV">
-                                                                    <rect key="frame" x="0.0" y="1" width="103" height="16"/>
-                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
-                                                                    <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="rLG-dD-IVv">
-                                                                        <font key="font" usesAppearanceFont="YES"/>
-                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                        <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
+                                                                <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="EJe-su-T03">
+                                                                    <rect key="frame" x="0.0" y="-1" width="103" height="19"/>
+                                                                    <buttonCell key="cell" type="roundRect" title="Remove" bezelStyle="roundedRect" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="WC1-Ug-ZCC">
+                                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                                        <font key="font" metaFont="cellTitle"/>
+                                                                    </buttonCell>
+                                                                    <color key="contentTintColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                                    <connections>
+                                                                        <action selector="tappedRemoveButton:" target="W0L-G9-PNL" id="9ww-vv-Lqv"/>
+                                                                    </connections>
+                                                                </button>
                                                             </subviews>
-                                                            <connections>
-                                                                <outlet property="textField" destination="B5i-JA-3ZV" id="qFm-PA-EP5"/>
-                                                            </connections>
+                                                            <constraints>
+                                                                <constraint firstItem="EJe-su-T03" firstAttribute="top" secondItem="W0L-G9-PNL" secondAttribute="top" id="Dcl-nT-3RM"/>
+                                                                <constraint firstItem="EJe-su-T03" firstAttribute="leading" secondItem="W0L-G9-PNL" secondAttribute="leading" id="FLL-aM-swX"/>
+                                                                <constraint firstAttribute="bottom" secondItem="EJe-su-T03" secondAttribute="bottom" id="ITS-Yg-fWb"/>
+                                                                <constraint firstAttribute="trailing" secondItem="EJe-su-T03" secondAttribute="trailing" id="jbN-lh-NQy"/>
+                                                            </constraints>
                                                         </tableCellView>
                                                     </prototypeCellViews>
                                                 </tableColumn>

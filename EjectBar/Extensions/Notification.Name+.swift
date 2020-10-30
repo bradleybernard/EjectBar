@@ -18,8 +18,6 @@ extension Notification.Name {
     static let showVolumesWindow = Notification.Name("showVolumesWindow")
 
     static let postVolumeCount = Notification.Name("postVolumeCount")
-    static let updateVolumeCount = Notification.Name("updateVolumeCount")
-
 
     static let favoritesUpdated = Notification.Name("favoritesUpdated")
     static let ejectFavorites = Notification.Name("ejectFavorites")

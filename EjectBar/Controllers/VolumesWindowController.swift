@@ -1,5 +1,5 @@
 //
-//  WindowController.swift
+//  VolumesWindowController.swift
 //  EjectBar
 //
 //  Created by Bradley Bernard on 7/24/17.

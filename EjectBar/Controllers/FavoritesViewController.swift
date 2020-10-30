@@ -10,18 +10,12 @@ import Cocoa
 
 class FavoritesViewController: NSViewController {
 
-    private static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .medium
-        return formatter
-    }()
-
     private var favorites: [Favorite] = [] {
         didSet {
             DispatchQueue.main.async { [weak self] in
                 self?.tableView.reloadData()
                 self?.tableView.resizeColumns()
+                self?.view.window?.resizeToFitTableView(tableView: self?.tableView)
             }
         }
     }
@@ -39,14 +33,6 @@ class FavoritesViewController: NSViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(FavoritesViewController.favoritesUpdated(notification:)), name: .favoritesUpdated, object: nil)
     }
 
-    @objc private func favoritesUpdated(notification: NSNotification) {
-        guard let userInfo = notification.userInfo, let favorites = userInfo["favorites"] as? Set<Favorite> else {
-            return
-        }
-
-        self.favorites = Array(favorites)
-    }
-
     private func loadFavorites() {
         guard let appFavorites = (NSApp.delegate as? AppDelegate)?.favorites else {
             return
@@ -54,54 +40,86 @@ class FavoritesViewController: NSViewController {
 
         favorites = Array(appFavorites)
     }
+
+    @objc private func favoritesUpdated(notification: NSNotification) {
+        guard let userInfo = notification.userInfo, let favorites = userInfo["favorites"] as? Set<Favorite> else {
+            return
+        }
+
+        self.favorites = Array(favorites)
+    }
     
 }
 
+// MARK: - NSTableViewDelegate
+
 extension FavoritesViewController: NSTableViewDelegate {
 
-    private static let sizeFormatter = ByteCountFormatter()
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .medium
+        return formatter
+    }()
 
     private enum CellIdentifier: String {
-        case idCell = "FavoriteIDCell"
-        case nameCell = "FavoriteNameCell"
-        case dateCell = "FavoriteDateCell"
-        case actionCell = "FavoriteActionCell"
+        case id = "FavoriteIDCell"
+        case name = "FavoriteNameCell"
+        case date = "FavoriteDateCell"
+        case action = "FavoriteActionCell"
+    }
+
+    private enum ColumnIdentifier: String {
+        case id = "FavoriteIDColumn"
+        case name = "FavoriteNameColumn"
+        case date = "FavoriteDateColumn"
+        case action = "FavoriteActionColumn"
+
+        var cellIdentifier: CellIdentifier {
+            switch self {
+                case .id:
+                    return .id
+                case .name:
+                    return .name
+                case .date:
+                    return .date
+                case .action:
+                    return .action
+            }
+        }
     }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        var text: String = ""
-        let cellIdentifier: CellIdentifier
-
         let favorite = favorites[row]
 
-        if tableColumn == tableView.tableColumns[0] {
-            text = favorite.id
-            cellIdentifier = .idCell
-        } else if tableColumn == tableView.tableColumns[1] {
-            text = favorite.name
-            cellIdentifier = .nameCell
-        } else if tableColumn == tableView.tableColumns[2] {
-            text = Self.dateFormatter.string(for: favorite.date) ?? ""
-            cellIdentifier = .dateCell
-        } else if tableColumn == tableView.tableColumns[3] {
-            text = ""
-            cellIdentifier = .actionCell
-        } else {
-            fatalError("Unknown tableView column \(String(describing: tableColumn))")
-        }
-
-        let identifier = NSUserInterfaceItemIdentifier(rawValue: cellIdentifier.rawValue)
-
-        guard let tableCellView = tableView.makeView(withIdentifier: identifier, owner: nil) as? NSTableCellView else {
+        guard let columnIdentifier = tableColumn?.identifier, let tableColumnType = ColumnIdentifier(rawValue: columnIdentifier.rawValue) else {
             return nil
         }
 
-        switch cellIdentifier {
-            case .actionCell:
+        var text: String = ""
+
+        switch tableColumnType {
+            case .id:
+                text = favorite.id
+            case .name:
+                text = favorite.name
+            case .date:
+                text = Self.dateFormatter.string(for: favorite.date) ?? ""
+            default:
                 break
-//                let selectedTableCell = tableCellView as? SelectedTableCell
-//                selectedTableCell?.saveCheckbox.state = checkboxState(volume)
-//                selectedTableCell?.saveCheckbox.action = #selector(VolumesController.checkboxSelected)
+        }
+
+        let cellType = tableColumnType.cellIdentifier
+        let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: cellType.rawValue)
+
+        guard let tableCellView = tableView.makeView(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView else {
+            return nil
+        }
+
+        switch cellType {
+            case .action:
+                let removeFavoriteCell = tableCellView as? RemoveFavoriteTableCellView
+                removeFavoriteCell?.delegate = self
             default:
                 tableCellView.textField?.stringValue = text
         }
@@ -115,7 +133,6 @@ extension FavoritesViewController: NSTableViewDelegate {
         }
 
         favorites = favoritesSorted
-        tableView.reloadData()
     }
 
     func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
@@ -123,10 +140,40 @@ extension FavoritesViewController: NSTableViewDelegate {
     }
 }
 
+// MARK: - NSTableViewDataSource
+
 extension FavoritesViewController: NSTableViewDataSource {
 
     func numberOfRows(in tableView: NSTableView) -> Int {
         favorites.count
+    }
+
+}
+
+// MARK: - RemoveFavoriteDelegate
+
+extension FavoritesViewController: RemoveFavoriteCellDelegate {
+
+    func removeFavoriteCellTapped(_ removeFavoriteCell: RemoveFavoriteTableCellView) {
+        let row = tableView.row(for: removeFavoriteCell)
+        let favorite = favorites[row]
+
+        let alert = NSAlert()
+        alert.messageText = "Remove \"\(favorite.name)\" as a favorite?"
+        alert.informativeText = "You can always add this volume back to your favorites later."
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "Yes")
+        alert.addButton(withTitle: "Cancel")
+
+        let result = alert.runModal()
+
+        guard result == .alertFirstButtonReturn else {
+            return
+        }
+
+        if let index = favorites.firstIndex(where: { favorite.id == $0.id }) {
+            favorites.remove(at: index)
+        }
     }
 
 }

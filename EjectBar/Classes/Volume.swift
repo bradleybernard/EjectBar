@@ -108,7 +108,7 @@ class Volume: NSObject {
     //        public var kDAReturnNotWritable: Int { get } /* ( 0xF8DA000B ) */
     //        public var kDAReturnUnsupported: Int { get } /* ( 0xF8DA000C ) */
 
-    func errorCodeToString(code: DAReturn) -> String {
+    private func errorCodeToString(code: DAReturn) -> String {
         let status = Int(code)
         
         if status == kDAReturnSuccess {
@@ -221,7 +221,7 @@ class VolumeListener {
         changedListener(session)
     }
     
-    func changedListener(_ session: DASession) {
+    private func changedListener(_ session: DASession) {
         let wrapper = CallbackWrapper<CAppDef, CAppRet>(callback: changedCallback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
         
@@ -238,11 +238,11 @@ class VolumeListener {
         listeners.append(wrapper)
     }
     
-    func changedCallback(disk: DADisk, keys: CFArray) {
+    private func changedCallback(disk: DADisk, keys: CFArray) {
         NotificationCenter.default.post(name: .resetTableView, object: nil, userInfo: nil)
     }
     
-    func mountApproval(_ session: DASession) {
+    private func mountApproval(_ session: DASession) {
         let wrapper = CallbackWrapper<MAppDef, MAppRet>(callback: mountCallback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
         
@@ -259,12 +259,12 @@ class VolumeListener {
         callbacks.append(wrapper)
     }
     
-    func mountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
+    private func mountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
         NotificationCenter.default.post(name: .diskMounted, object: Volume.fromDisk(disk), userInfo: nil)
         return nil
     }
     
-    func unmountApproval(_ session: DASession) {
+    private func unmountApproval(_ session: DASession) {
         let wrapper = CallbackWrapper<MAppDef, MAppRet>(callback: unmountCallback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
         
@@ -281,7 +281,7 @@ class VolumeListener {
         callbacks.append(wrapper)
     }
     
-    func unmountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
+    private func unmountCallback(disk: DADisk, cont: UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>? {
         NotificationCenter.default.post(name: .diskUnmounted, object: Volume.fromDisk(disk), userInfo: nil)
         return nil
     }
