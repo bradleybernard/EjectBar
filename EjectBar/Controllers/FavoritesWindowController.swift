@@ -12,8 +12,4 @@ class FavoritesWindowController: NSWindowController {
 
     static let sceneIdentifier = NSStoryboard.SceneIdentifier("FavoritesWindowController")
 
-    override func windowDidLoad() {
-        super.windowDidLoad()
-    }
-
 }

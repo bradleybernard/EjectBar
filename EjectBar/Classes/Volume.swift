@@ -9,37 +9,48 @@
 
 import Foundation
 
-typealias UnmountDef = (Bool, NSError?)
-typealias UnmountRet = Void
+
+// MARK: - Type aliases
+
+private typealias UnmountDef = (Bool, NSError?)
+private typealias UnmountRet = Void
 typealias UnmountCallback = (Bool, NSError?) -> Void
 
-typealias MAppDef = (DADisk, UnsafeMutableRawPointer?)
-typealias MAppRet = Unmanaged<DADissenter>?
-typealias MAppCallback = (DADisk, UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>?
+private typealias MAppDef = (DADisk, UnsafeMutableRawPointer?)
+private typealias MAppRet = Unmanaged<DADissenter>?
+private typealias MAppCallback = (DADisk, UnsafeMutableRawPointer?) -> Unmanaged<DADissenter>?
 
-typealias CAppDef = (DADisk, CFArray)
-typealias CAppRet = Void
-typealias CAppCallback = (DADisk, CFArray) -> Void
+private typealias CAppDef = (DADisk, CFArray)
+private typealias CAppRet = Void
+private typealias CAppCallback = (DADisk, CFArray) -> Void
 
-enum VolumeComponent: Int {
+// MARK: - Volume constants
+
+private enum VolumeComponent: Int {
     case root = 1
 }
 
-enum VolumeReservedNames: String {
+private enum VolumeReservedNames: String {
     case EFI = "EFI"
     case Volumes = "Volumes"
 }
 
-class CallbackWrapper<Input, Output> {
+// MARK: - Callbacks
+
+private class CallbackWrapper<Input, Output> {
     let callback : (Input) -> Output
     init(callback: @escaping (Input) -> Output) {
         self.callback = callback
     }
 }
 
+// MARK: - DASession
+
 class SessionWrapper {
     static let shared: DASession? = DASessionCreate(kCFAllocatorDefault)
 }
+
+// MARK: - Volume
 
 @objcMembers
 class Volume: NSObject {
@@ -182,6 +193,8 @@ class Volume: NSObject {
         return urls.filter { Volume.isVolumeURL($0) }.compactMap { Volume.fromURL($0) }
     }
 }
+
+// MARK: - Volume Listener
 
 class VolumeListener {
     static let shared = VolumeListener()

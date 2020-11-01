@@ -18,6 +18,8 @@ class VolumesWindowController: NSWindowController {
         setupNotificationListeners()
     }
 
+    // MARK: - Notifications
+
     private func setupNotificationListeners() {
         NotificationCenter.default.addObserver(forName: .showVolumesWindow, object: nil, queue: nil, using: showVolumesWindow(notification:))
         NotificationCenter.default.addObserver(forName: .hideVolumesWindow, object: nil, queue: nil, using: hideVolumesWindow(notification:))
@@ -25,6 +27,8 @@ class VolumesWindowController: NSWindowController {
         NotificationCenter.default.addObserver(forName: .showFavoritesWindow, object: nil, queue: nil, using: showFavoritesWindow(notification:))
         NotificationCenter.default.addObserver(forName: .hideFavoritesWindow, object: nil, queue: nil, using: hideFavoritesWindow(notification:))
     }
+
+    // MARK: - Actions
     
     @IBAction private func ejectAtion(_ sender: Any) {
         NotificationCenter.default.post(name: .ejectFavorites, object: nil, userInfo: nil)
@@ -48,6 +52,8 @@ class VolumesWindowController: NSWindowController {
     @IBAction private func refreshAction(_ sender: Any) {
         NotificationCenter.default.post(name: .resetTableView, object: nil, userInfo: nil)
     }
+
+    // MARK: - Window management
 
     private func showFavoritesWindow(notification: Notification) {
         createFavoritesWindow(show: true)

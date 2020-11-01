@@ -20,17 +20,13 @@ class FavoritesViewController: NSViewController {
         }
     }
 
-    @IBOutlet weak var tableView: NSTableView!
+    @IBOutlet private weak var tableView: NSTableView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         setupNotifications()
         loadFavorites()
-    }
-
-    private func setupNotifications() {
-        NotificationCenter.default.addObserver(self, selector: #selector(FavoritesViewController.favoritesUpdated(notification:)), name: .favoritesUpdated, object: nil)
     }
 
     private func loadFavorites() {
@@ -41,7 +37,11 @@ class FavoritesViewController: NSViewController {
         favorites = Array(appFavorites)
     }
 
-    @objc private func favoritesUpdated(notification: NSNotification) {
+    private func setupNotifications() {
+        NotificationCenter.default.addObserver(forName: .favoritesUpdated, object: nil, queue: nil, using: favoritesUpdated(notification:))
+    }
+
+    private func favoritesUpdated(notification: Notification) {
         guard let userInfo = notification.userInfo, let favorites = userInfo["favorites"] as? Set<Favorite> else {
             return
         }
@@ -154,7 +154,7 @@ extension FavoritesViewController: NSTableViewDataSource {
 
 extension FavoritesViewController: RemoveFavoriteCellDelegate {
 
-    func removeFavoriteCellTapped(_ removeFavoriteCell: RemoveFavoriteTableCellView) {
+    func removeFavoriteCellClicked(_ removeFavoriteCell: RemoveFavoriteTableCellView) {
         let row = tableView.row(for: removeFavoriteCell)
         let favorite = favorites[row]
 

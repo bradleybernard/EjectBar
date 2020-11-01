@@ -24,7 +24,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     static let backgroundQueue = DispatchQueue(label: "Background")
     var favorites = Set<Favorite>()
 
-    func applicationDidFinishLaunching(_ aNotification: Notification) {
+    // MARK: - NSApplicationDelegate
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
         Self.backgroundQueue.async { [weak self] in
             self?.favorites = Self.loadFavorites()
         }
@@ -32,6 +34,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupMenu()
         setupNotificationListeners()
     }
+
+    // MARK: - Notifications
     
     private func setupNotificationListeners() {
         NotificationCenter.default.addObserver(forName: .postVolumeCount, object: nil, queue: nil, using: postVolumeCount)
@@ -46,6 +50,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self?.statusItem.button?.title = String(count)
         }
     }
+
+    // MARK: File loading and saving
 
     private static var settingsURL: URL? {
         guard let source = Bundle.main.path(forResource: Path.settings.rawValue, ofType: Path.plist.rawValue),
@@ -70,7 +76,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return .init()
         }
 
-        let value: Set<Favorite> = {
+        let favoritesSet: Set<Favorite> = {
             do {
                 return try PropertyListDecoder().decode(Set<Favorite>.self, from: data)
             } catch {
@@ -78,7 +84,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }()
 
-        return value
+        return favoritesSet
     }
     
     func saveFavorites(_ favorites: Set<Favorite>) {
@@ -95,6 +101,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.favorites = favorites
         NotificationCenter.default.post(name: .favoritesUpdated, object: nil, userInfo: ["favorites": favorites])
     }
+
+    // MARK: - Menu
     
     private func setupMenu() {
         menu.addItem(NSMenuItem(title: "Eject Favorites", action: #selector(AppDelegate.ejectFavorites(sender:)), keyEquivalent: "e"))
@@ -112,6 +120,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem.button?.imagePosition = .imageLeft
         statusItem.button?.title = "0"
     }
+
+    // MARK: - Actions
     
     @objc private func quitAction(sender: Any) {
         NSApplication.shared.terminate(self)

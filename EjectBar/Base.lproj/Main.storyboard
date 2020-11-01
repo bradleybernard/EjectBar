@@ -790,7 +790,7 @@
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                            <tableViewGridLines key="gridStyleMask" vertical="YES" horizontal="YES"/>
+                                            <tableViewGridLines key="gridStyleMask" horizontal="YES"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
                                                 <tableColumn identifier="VolumeFavoriteColumn" width="100" minWidth="40" maxWidth="100" id="iuH-9v-cIm">
@@ -810,8 +810,8 @@
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <button translatesAutoresizingMaskIntoConstraints="NO" id="IFZ-M1-q27">
-                                                                    <rect key="frame" x="18" y="0.0" width="84" height="18"/>
-                                                                    <buttonCell key="cell" type="check" title="Favorite" bezelStyle="regularSquare" imagePosition="left" inset="2" id="FwJ-fa-dIM">
+                                                                    <rect key="frame" x="8" y="-2" width="94" height="21"/>
+                                                                    <buttonCell key="cell" type="check" title="Favorite" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="FwJ-fa-dIM">
                                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                                         <font key="font" metaFont="system"/>
                                                                         <connections>
@@ -821,9 +821,10 @@
                                                                 </button>
                                                             </subviews>
                                                             <constraints>
-                                                                <constraint firstItem="IFZ-M1-q27" firstAttribute="leading" secondItem="0w0-VC-GK8" secondAttribute="leading" constant="20" id="0DP-kF-JqP"/>
-                                                                <constraint firstItem="IFZ-M1-q27" firstAttribute="centerY" secondItem="0w0-VC-GK8" secondAttribute="centerY" id="LCj-BU-0Iy"/>
-                                                                <constraint firstAttribute="trailing" secondItem="IFZ-M1-q27" secondAttribute="trailing" id="Nll-0I-hOU"/>
+                                                                <constraint firstItem="IFZ-M1-q27" firstAttribute="leading" secondItem="0w0-VC-GK8" secondAttribute="leading" constant="10" id="3UT-Tv-skA"/>
+                                                                <constraint firstAttribute="trailing" secondItem="IFZ-M1-q27" secondAttribute="trailing" id="JjP-cN-fj8"/>
+                                                                <constraint firstAttribute="bottom" secondItem="IFZ-M1-q27" secondAttribute="bottom" id="SLH-bS-s9a"/>
+                                                                <constraint firstItem="IFZ-M1-q27" firstAttribute="top" secondItem="0w0-VC-GK8" secondAttribute="top" id="Tm1-PU-PpK"/>
                                                             </constraints>
                                                             <connections>
                                                                 <outlet property="button" destination="IFZ-M1-q27" id="Sc4-vY-8eh"/>
@@ -1116,17 +1117,17 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pUr-B8-bvc">
-                                <rect key="frame" x="0.0" y="0.0" width="479" height="204"/>
+                                <rect key="frame" x="0.0" y="0.0" width="479" height="156"/>
                                 <clipView key="contentView" id="z5h-PO-4WO">
-                                    <rect key="frame" x="1" y="0.0" width="477" height="203"/>
+                                    <rect key="frame" x="1" y="0.0" width="477" height="155"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" alternatingRowBackgroundColors="YES" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="FST-wY-4oM" viewBased="YES" id="2SG-Ha-Bnd">
-                                            <rect key="frame" x="0.0" y="0.0" width="477" height="178"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="477" height="130"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                            <tableViewGridLines key="gridStyleMask" vertical="YES" horizontal="YES"/>
+                                            <tableViewGridLines key="gridStyleMask" horizontal="YES"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
                                                 <tableColumn identifier="FavoriteIDColumn" width="116" minWidth="40" maxWidth="1000" id="qf1-Wf-hro">

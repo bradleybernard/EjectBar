@@ -17,7 +17,7 @@ extension NSWindow {
     // https://developer.apple.com/documentation/appkit/nswindow/stylemask
     private static let leftRightPadding: CGFloat = 2
 
-    func makeActiveWindow() {
+    private func makeActiveWindow() {
         makeKeyAndOrderFront(self)
         NSApp.activate(ignoringOtherApps: true)
     }

@@ -9,7 +9,7 @@
 import Cocoa
 
 protocol FavoriteToggleCellDelegate: AnyObject {
-    func favoriteToggleCellTapped(_ favoriteToggleCell: FavoriteToggleCellView)
+    func favoriteToggleCellClicked(_ favoriteToggleCell: FavoriteToggleCellView)
 }
 
 class FavoriteToggleCellView: NSTableCellView {
@@ -20,7 +20,7 @@ class FavoriteToggleCellView: NSTableCellView {
     @IBOutlet weak var buttonCell: NSButtonCell!
 
     @IBAction func checkboxAction(_ sender: Any) {
-        delegate?.favoriteToggleCellTapped(self)
+        delegate?.favoriteToggleCellClicked(self)
     }
 
 }

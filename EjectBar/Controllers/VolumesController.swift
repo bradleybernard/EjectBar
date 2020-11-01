@@ -11,19 +11,12 @@ import Foundation
 
 class VolumesController: NSViewController {
     
-    @IBOutlet weak var tableView: NSTableView!
+    @IBOutlet private weak var tableView: NSTableView!
 
     private var volumes = [Volume]() {
         didSet {
             DispatchQueue.main.async { [weak self] in
-                guard let self = self else {
-                    return
-                }
-
-                self.tableView.reloadData()
-                self.tableView.resizeColumns()
-                self.view.window?.resizeToFitTableView(tableView: self.tableView)
-                self.postVolumeCount()
+                self?.tableViewDataUpdated()
             }
         }
     }
@@ -31,15 +24,15 @@ class VolumesController: NSViewController {
     private var favorites = Set<Favorite>() {
         didSet {
             DispatchQueue.main.async { [weak self] in
-                guard let self = self else {
-                    return
-                }
-
-                self.tableView.reloadData()
-                self.tableView.resizeColumns()
-                self.view.window?.resizeToFitTableView(tableView: self.tableView)
-                self.postVolumeCount()
+                self?.tableViewDataUpdated()
             }
+        }
+    }
+
+    private var favoriteVolumes: [Volume] {
+        let favoriteVolumeIds = favorites.map(\.id)
+        return volumes.filter { volume in
+            favoriteVolumeIds.contains(volume.id)
         }
     }
 
@@ -52,6 +45,13 @@ class VolumesController: NSViewController {
         setupNotificationListeners()
         readFavorites()
     }
+
+    private func tableViewDataUpdated() {
+        tableView.reloadData()
+        tableView.resizeColumns()
+        view.window?.resizeToFitTableView(tableView: self.tableView)
+        postVolumeCount()
+    }
     
     private func readFavorites() {
         AppDelegate.backgroundQueue.async { [weak self] in
@@ -62,6 +62,8 @@ class VolumesController: NSViewController {
             self.favorites = AppDelegate.loadFavorites()
         }
     }
+
+    // MARK: - Notifications
     
     private func setupNotificationListeners() {
         NotificationCenter.default.addObserver(forName: .diskMounted, object: nil, queue: nil, using: diskMounted)
@@ -73,11 +75,7 @@ class VolumesController: NSViewController {
     
     private func resetTableView(notification: Notification) {
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else {
-                return
-            }
-            
-            self.volumes = Volume.queryVolumes()
+            self?.volumes = Volume.queryVolumes()
         }
     }
 
@@ -87,7 +85,6 @@ class VolumesController: NSViewController {
         }
 
         favorites = updatedFavorites
-        postVolumeCount()
     }
     
     private func ejectFavorites(notification: Notification) {
@@ -147,10 +144,6 @@ class VolumesController: NSViewController {
         
         volumes = volumes.filter { $0.id != volume.id }
     }
-    
-    private func checkboxState(_ volume: Volume) -> NSCell.StateValue {
-        return favorites.map(\.id).contains(volume.id) ? .on : .off
-    }
 }
 
 // MARK: - NSTableViewDelegate
@@ -200,6 +193,10 @@ extension VolumesController: NSTableViewDelegate {
                     return .protocol
             }
         }
+    }
+
+    private func checkboxState(_ volume: Volume) -> NSCell.StateValue {
+        return favorites.map(\.id).contains(volume.id) ? .on : .off
     }
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
@@ -276,7 +273,7 @@ extension VolumesController: NSTableViewDataSource {
 
 extension VolumesController: FavoriteToggleCellDelegate {
 
-    func favoriteToggleCellTapped(_ favoriteToggleCell: FavoriteToggleCellView) {
+    func favoriteToggleCellClicked(_ favoriteToggleCell: FavoriteToggleCellView) {
         guard let checkbox = favoriteToggleCell.buttonCell else {
             return
         }

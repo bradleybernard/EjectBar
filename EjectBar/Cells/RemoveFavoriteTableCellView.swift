@@ -9,7 +9,7 @@
 import Cocoa
 
 protocol RemoveFavoriteCellDelegate: AnyObject {
-    func removeFavoriteCellTapped(_ removeFavoriteCell: RemoveFavoriteTableCellView)
+    func removeFavoriteCellClicked(_ removeFavoriteCell: RemoveFavoriteTableCellView)
 }
 
 class RemoveFavoriteTableCellView: NSTableCellView {
@@ -19,7 +19,7 @@ class RemoveFavoriteTableCellView: NSTableCellView {
     @IBOutlet weak var removeButton: NSButton!
     
     @IBAction func tappedRemoveButton(_ sender: Any) {
-        delegate?.removeFavoriteCellTapped(self)
+        delegate?.removeFavoriteCellClicked(self)
     }
     
 }
