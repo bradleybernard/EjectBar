@@ -12,41 +12,44 @@ import AppKit
 extension NSWindow {
 
     private static let fadeDuration = 0.35
+
+    // Based on the window's: NSWindow.StyleMask
+    // https://developer.apple.com/documentation/appkit/nswindow/stylemask
     private static let leftRightPadding: CGFloat = 2
+
+    func makeActiveWindow() {
+        makeKeyAndOrderFront(self)
+        NSApp.activate(ignoringOtherApps: true)
+    }
     
     func fadeIn(completion: (() -> Void)? = nil) {
-        guard !isKeyWindow else {
+        guard !isMainWindow else {
+            makeActiveWindow()
+            return
+        }
+
+        guard !isVisible else {
+            makeActiveWindow()
+            completion?()
             return
         }
 
         alphaValue = 0
-
-        makeKeyAndOrderFront(self)
-        NSRunningApplication.current.activate(options: .activateIgnoringOtherApps)
+        makeActiveWindow()
 
         NSAnimationContext.runAnimationGroup { [weak self] context in
-            guard let self = self else {
-                return
-            }
-
             context.duration = Self.fadeDuration
-            self.animator().alphaValue = 1
+            self?.animator().alphaValue = 1
         } completionHandler: { [weak self] in
-            NSRunningApplication.current.activate(options: .activateIgnoringOtherApps)
-            self?.makeKeyAndOrderFront(self)
-
+            self?.makeActiveWindow()
             completion?()
         }
     }
 
     func fadeOut(completion: (() -> Void)? = nil) {
         NSAnimationContext.runAnimationGroup { [weak self] context in
-            guard let self = self else {
-                return
-            }
-
             context.duration = Self.fadeDuration
-            self.animator().alphaValue = 0
+            self?.animator().alphaValue = 0
         } completionHandler: { [weak self] in
             guard let self = self else {
                 return
