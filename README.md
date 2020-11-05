@@ -13,9 +13,9 @@ The application lives in the macOS menubar and can be shown with a click on the 
 The app uses the [Disk Arbitration framework](https://github.com/bradleybernard/EjectBar/blob/master/EjectBar/Classes/Volume.swift#L170) to hook into mount/unmount volume callbacks at a low-level. In addition, the code uses [low-level reference management](https://github.com/bradleybernard/EjectBar/blob/master/EjectBar/Classes/Volume.swift#L67) since the DA framework only accepts C function pointers. Lastly, the app uses a [class that boxes a callback using generic types](https://github.com/bradleybernard/EjectBar/blob/master/EjectBar/Classes/Volume.swift#L28-L33) Input, Output to create a generic function: (Input) -> Output. 
 
 ## Screenshots
-![Menu bar](/Screenshots/1.png?raw=true "1")
-![Mounted volumes](/Screenshots/2.png?raw=true "2")
-![Favorite volumes](/Screenshots/3.png?raw=true "3")
+![Menu bar](/Screenshots/3.png?raw=true "3")
+![Mounted volumes](/Screenshots/1.png?raw=true "1")
+![Favorite volumes](/Screenshots/2.png?raw=true "2")
 
 ## Credits
 Created by [Bradley Bernard](https://bradleybernard.com) with [techincal help](https://twitter.com/jckarter/status/889604979995967488) from the Swift expert [Joe Groff](https://twitter.com/jckarter)!
