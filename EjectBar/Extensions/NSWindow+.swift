@@ -18,7 +18,9 @@ extension NSWindow {
     private static let leftRightPadding: CGFloat = 2
 
     private func makeActiveWindow() {
-        makeKeyAndOrderFront(self)
+        // Warning: Window NSWindow 0x148666000 ordered front from a non-active application and may order beneath the active application's windows.
+        // makeKeyAndOrderFront(self)
+        orderFrontRegardless()
         NSApp.activate(ignoringOtherApps: true)
     }
     

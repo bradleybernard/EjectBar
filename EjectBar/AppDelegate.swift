@@ -117,8 +117,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         statusItem.menu = menu
         statusItem.button?.image = NSImage(named: "EjectIcon")
-        statusItem.button?.imagePosition = .imageLeft
+        statusItem.button?.imagePosition = .imageLeading
         statusItem.button?.title = "0"
+        statusItem.button?.alignment = .center
     }
 
     // MARK: - Actions
