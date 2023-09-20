@@ -195,7 +195,7 @@ extension VolumesController: NSTableViewDelegate {
         }
     }
 
-    private func checkboxState(_ volume: Volume) -> NSCell.StateValue {
+    private func checkboxState(_ volume: Volume) -> NSControl.StateValue {
         return favorites.map(\.id).contains(volume.id) ? .on : .off
     }
     
