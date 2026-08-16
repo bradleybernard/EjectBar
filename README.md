@@ -18,4 +18,4 @@ The app uses the [Disk Arbitration framework](https://github.com/bradleybernard/
 ![Favorite volumes](/Screenshots/2.png?raw=true "2")
 
 ## Credits
-Created by [Bradley Bernard](https://bradleybernard.com) with [technical help](https://twitter.com/jckarter/status/889604979995967488) from the Swift expert [Joe Groff](https://twitter.com/jckarter)!
+Created by [Bradley Bernard](https://bradleybernard.com).
