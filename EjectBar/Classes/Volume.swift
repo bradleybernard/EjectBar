@@ -7,6 +7,7 @@
 //
 //
 
+import AppKit
 import Foundation
 
 
@@ -54,7 +55,8 @@ class SessionWrapper {
 
 @objcMembers
 class Volume: NSObject {
-    let disk: DADisk
+    let disk: DADisk?
+    let url: URL
 
     let id: String
     let name: String
@@ -66,8 +68,9 @@ class Volume: NSObject {
     let ejectable: Bool
     let removable: Bool
 
-    init(disk: DADisk, id: String, name: String, model: String, device: String, protocol: String, path: String, size: Int, ejectable: Bool, removable: Bool) {
+    init(disk: DADisk?, url: URL, id: String, name: String, model: String, device: String, protocol: String, path: String, size: Int, ejectable: Bool, removable: Bool) {
         self.disk = disk
+        self.url = url
         self.id = id
         self.name = name
         self.model = model
@@ -79,10 +82,30 @@ class Volume: NSObject {
         self.removable = removable
     }
 
-    private static let keys: [URLResourceKey] = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
-    private static let set: Set<URLResourceKey> = [.volumeIdentifierKey, .volumeLocalizedNameKey, .volumeTotalCapacityKey, .volumeIsEjectableKey, .volumeIsRemovableKey]
+    private static let keys: Set<URLResourceKey> = [
+        .volumeIdentifierKey,
+        .volumeIsEjectableKey,
+        .volumeIsLocalKey,
+        .volumeIsRemovableKey,
+        .volumeLocalizedFormatDescriptionKey,
+        .volumeLocalizedNameKey,
+        .volumeTotalCapacityKey,
+        .volumeUUIDStringKey
+    ]
 
     func unmount(callback: @escaping UnmountCallback) {
+        guard let disk = disk else {
+            AppDelegate.backgroundQueue.async { [url] in
+                do {
+                    try NSWorkspace.shared.unmountAndEjectDevice(at: url)
+                    callback(true, nil)
+                } catch let error as NSError {
+                    callback(false, error)
+                }
+            }
+            return
+        }
+
         let wrapper = CallbackWrapper<UnmountDef, UnmountRet>(callback: callback)
         let address = UnsafeMutableRawPointer(Unmanaged.passRetained(wrapper).toOpaque())
 
@@ -132,53 +155,64 @@ class Volume: NSObject {
     }
 
     static func fromURL(_ url: URL) -> Volume? {
-        guard let session = SessionWrapper.shared, let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, url as CFURL) else {
+        guard let resourceValues = try? url.resourceValues(forKeys: keys) else {
             return nil
         }
 
-        return Volume.fromDisk(disk)
-    }
-    
-    static func fromDisk(_ disk: DADisk) -> Volume? {
-        guard let dict = DADiskCopyDescription(disk),
-            let diskInfo = dict as? [NSString: Any],
-            let name = diskInfo[kDADiskDescriptionVolumeNameKey] as? String,
-            let size = diskInfo[kDADiskDescriptionMediaSizeKey] as? Int,
-            let ejectable = diskInfo[kDADiskDescriptionMediaEjectableKey] as? Bool,
-            let removable = diskInfo[kDADiskDescriptionMediaRemovableKey] as? Bool,
-            let bsdName = diskInfo[kDADiskDescriptionMediaBSDNameKey] as? String,
-            let path = diskInfo[kDADiskDescriptionVolumePathKey] as? URL,
-            let idVal = diskInfo[kDADiskDescriptionVolumeUUIDKey],
-            let model = diskInfo[kDADiskDescriptionDeviceModelKey] as? String,
-            let `protocol` = diskInfo[kDADiskDescriptionDeviceProtocolKey] as? String
-        else {
-            return nil
-        }
+        let disk: DADisk? = {
+            guard let session = SessionWrapper.shared else {
+                return nil
+            }
+
+            return DADiskCreateFromVolumePath(kCFAllocatorDefault, session, url as CFURL)
+        }()
+
+        let diskInfo: [NSString: Any] = {
+            guard let disk = disk, let description = DADiskCopyDescription(disk) else {
+                return [:]
+            }
+
+            return description as? [NSString: Any] ?? [:]
+        }()
+
+        let name = diskInfo[kDADiskDescriptionVolumeNameKey] as? String
+            ?? resourceValues.volumeLocalizedName
+            ?? url.lastPathComponent
 
         guard name != VolumeReservedNames.EFI.rawValue else {
             return nil
         }
-        
-        let volumeID = idVal as! CFUUID
 
-        guard let cfID = CFUUIDCreateString(kCFAllocatorDefault, volumeID) else {
+        let identifier = resourceValues.volumeUUIDString
+            ?? resourceValues.volumeIdentifier.map { String(describing: $0) }
+            ?? url.standardizedFileURL.path
+
+        let isLocal = resourceValues.volumeIsLocal ?? true
+        let localizedFormat = resourceValues.volumeLocalizedFormatDescription
+
+        return Volume(
+            disk: disk,
+            url: url,
+            id: identifier,
+            name: name,
+            model: diskInfo[kDADiskDescriptionDeviceModelKey] as? String ?? localizedFormat ?? "Mounted Volume",
+            device: diskInfo[kDADiskDescriptionMediaBSDNameKey] as? String ?? url.lastPathComponent,
+            protocol: diskInfo[kDADiskDescriptionDeviceProtocolKey] as? String ?? (isLocal ? localizedFormat ?? "Disk Image" : "Network"),
+            path: url.path,
+            size: diskInfo[kDADiskDescriptionMediaSizeKey] as? Int ?? resourceValues.volumeTotalCapacity ?? 0,
+            ejectable: diskInfo[kDADiskDescriptionMediaEjectableKey] as? Bool ?? resourceValues.volumeIsEjectable ?? true,
+            removable: diskInfo[kDADiskDescriptionMediaRemovableKey] as? Bool ?? resourceValues.volumeIsRemovable ?? true
+        )
+    }
+
+    static func fromDisk(_ disk: DADisk) -> Volume? {
+        guard let description = DADiskCopyDescription(disk),
+              let diskInfo = description as? [NSString: Any],
+              let url = diskInfo[kDADiskDescriptionVolumePathKey] as? URL else {
             return nil
         }
 
-        let id = cfID as String
-        
-        return Volume(
-            disk: disk,
-            id: id,
-            name: name,
-            model: model,
-            device: bsdName,
-            protocol: `protocol`,
-            path: path.absoluteString,
-            size: size,
-            ejectable: ejectable,
-            removable: removable
-        )
+        return fromURL(url)
     }
 
     static func isVolumeURL(_ url: URL) -> Bool {
@@ -186,7 +220,7 @@ class Volume: NSObject {
     }
 
     static func queryVolumes() -> [Volume] {
-        guard let urls = FileManager().mountedVolumeURLs(includingResourceValuesForKeys: keys, options: []) else {
+        guard let urls = FileManager().mountedVolumeURLs(includingResourceValuesForKeys: Array(keys), options: []) else {
             return []
         }
 

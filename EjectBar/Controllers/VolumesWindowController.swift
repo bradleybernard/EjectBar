@@ -10,6 +10,8 @@ import Cocoa
 
 class VolumesWindowController: NSWindowController {
 
+    static let sceneIdentifier = NSStoryboard.SceneIdentifier("VolumesWindowController")
+
     private var favoritesWindowController: FavoritesWindowController?
 
     override func windowDidLoad() {

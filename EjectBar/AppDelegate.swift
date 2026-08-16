@@ -20,6 +20,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let menu = NSMenu()
+    private var volumesWindowController: VolumesWindowController?
 
     static let backgroundQueue = DispatchQueue(label: "Background")
     var favorites = Set<Favorite>()
@@ -33,6 +34,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         setupMenu()
         setupNotificationListeners()
+        setupVolumesWindow()
+    }
+
+    private func setupVolumesWindow() {
+        let storyboard = NSStoryboard(name: "Main", bundle: .main)
+        volumesWindowController = storyboard.instantiateController(withIdentifier: VolumesWindowController.sceneIdentifier) as? VolumesWindowController
+        volumesWindowController?.window?.orderOut(nil)
     }
 
     // MARK: - Notifications
@@ -148,4 +156,3 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NotificationCenter.default.post(name: .ejectFavorites, object: nil, userInfo: nil)
     }
 }
-

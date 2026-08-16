@@ -46,6 +46,10 @@ class VolumesController: NSViewController {
         readFavorites()
     }
 
+    deinit {
+        NSWorkspace.shared.notificationCenter.removeObserver(self)
+    }
+
     private func tableViewDataUpdated() {
         tableView.reloadData()
         tableView.resizeColumns()
@@ -71,6 +75,15 @@ class VolumesController: NSViewController {
         NotificationCenter.default.addObserver(forName: .ejectFavorites, object: nil, queue: nil, using: ejectFavorites)
         NotificationCenter.default.addObserver(forName: .resetTableView, object: nil, queue: nil, using: resetTableView)
         NotificationCenter.default.addObserver(forName: .favoritesUpdated, object: nil, queue: nil, using: favoritesUpdated)
+
+        let workspaceNotificationCenter = NSWorkspace.shared.notificationCenter
+        workspaceNotificationCenter.addObserver(self, selector: #selector(workspaceVolumesChanged), name: NSWorkspace.didMountNotification, object: nil)
+        workspaceNotificationCenter.addObserver(self, selector: #selector(workspaceVolumesChanged), name: NSWorkspace.didUnmountNotification, object: nil)
+        workspaceNotificationCenter.addObserver(self, selector: #selector(workspaceVolumesChanged), name: NSWorkspace.didRenameVolumeNotification, object: nil)
+    }
+
+    @objc private func workspaceVolumesChanged(notification: Notification) {
+        resetTableView(notification: notification)
     }
     
     private func resetTableView(notification: Notification) {
